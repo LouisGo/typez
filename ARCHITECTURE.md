@@ -4,128 +4,56 @@
 
 ```
 src/
-├── main/                          # Electron 主进程
-│   ├── database/                  # SQLite 数据库
-│   │   ├── migrations/           # 数据库迁移脚本
-│   │   │   └── 001_init.sql     # 初始化表结构
-│   │   └── index.ts              # DatabaseService 类
-│   ├── ipc/                       # IPC Handlers
-│   │   ├── database.handler.ts   # 数据库操作处理器
-│   │   └── index.ts
-│   └── index.ts                   # 主进程入口
+├── main/                          # Electron 主进程 (业务核心)
+│   ├── services/                  # 核心业务逻辑实现 (Real/Mock 自动切换)
+│   │   ├── auth.service.ts
+│   │   ├── chat.service.ts
+│   │   └── index.ts               # 服务出口
+│   ├── database/                  # SQLite 数据库服务
+│   ├── ipc/                       # IPC Handlers (薄转发层)
+│   │   ├── auth.handler.ts
+│   │   └── chat.handler.ts
+│   └── mock/                      # Mock 实现 (仅开发环境)
+│       ├── generators/            # Faker 数据生成器
+│       └── services/              # Mock 服务实现
 │
-├── preload/                       # Preload 脚本
-│   ├── index.ts                   # API 暴露
-│   └── index.d.ts                 # 类型定义
+├── preload/                       # Preload 脚本 (IPC 桥接)
 │
-├── renderer/src/                  # 渲染进程
-│   ├── app/                       # 应用配置层
-│   │   └── providers/            # 全局 Providers
-│   │       ├── query-provider.tsx
-│   │       └── index.tsx
-│   │
-│   ├── features/                  # 功能模块（按领域划分）
-│   │   ├── auth/                 # 认证模块
-│   │   │   ├── domain/           # 领域层
-│   │   │   │   ├── entities/
-│   │   │   │   │   └── user.entity.ts
-│   │   │   │   └── types.ts
-│   │   │   ├── data/             # 数据层
-│   │   │   │   ├── repositories/
-│   │   │   │   │   └── auth.repository.ts
-│   │   │   │   └── sources/
-│   │   │   │       └── auth.mock.ts
-│   │   │   └── application/      # 应用层
-│   │   │       └── stores/
-│   │   │           └── auth.store.ts (Zustand)
-│   │   │
-│   │   └── chat/                 # 聊天模块
-│   │       ├── domain/
-│   │       │   └── entities/
-│   │       │       ├── chat.entity.ts
-│   │       │       └── message.entity.ts
-│   │       ├── data/
-│   │       │   └── sources/
-│   │       │       └── chat.mock.ts
-│   │       ├── application/
-│   │       │   └── stores/
-│   │       │       └── chat.store.ts
-│   │       └── presentation/     # 表现层
-│   │           ├── components/
-│   │           │   └── ChatList.tsx
-│   │           └── pages/
-│   │               └── ChatPage.tsx
-│   │
-│   ├── infra/                     # 基础设施层
-│   │   ├── ipc/                  # IPC 客户端
-│   │   │   ├── client.ts
-│   │   │   └── index.ts
-│   │   └── mock/                 # Mock 数据
-│   │       └── generators/
-│   │           ├── user.generator.ts
-│   │           ├── chat.generator.ts
-│   │           ├── message.generator.ts
-│   │           └── index.ts
-│   │
-│   ├── shared/                    # 共享代码
-│   │   ├── utils/                # 工具函数
-│   │   │   ├── cn.ts             # Tailwind class merger
-│   │   │   ├── date.ts           # 日期格式化
-│   │   │   └── index.ts
-│   │   └── types/                # 共享类型
-│   │       ├── common.ts
-│   │       └── index.ts
-│   │
-│   ├── App.tsx                    # 根组件
-│   ├── main.tsx                   # 渲染进程入口
-│   └── styles/
-│       └── globals.css           # 全局样式
+├── renderer/src/                  # 渲染进程 (薄客户端)
+│   ├── api/                       # API 客户端层 (类比 HTTP 客户端)
+│   │   ├── client.ts              # 拦截器与核心调用逻辑
+│   │   ├── auth.api.ts
+│   │   └── chat.api.ts
+│   ├── features/                  # 功能模块 (3层扁平化)
+│   │   ├── auth/
+│   │   │   ├── domain/           # 领域类型与实体
+│   │   │   ├── store/            # 状态管理 (Zustand + API)
+│   │   │   └── components/       # UI 组件
+│   │   └── chat/...
+│   ├── app/                       # 全局配置与容器
+│   ├── pages/                     # 路由页面 (View 层)
+│   └── shared/                    # 共享组件与工具
 │
-└── shared/                        # 主进程和渲染进程共享
-    ├── types/                    # 共享类型定义
-    │   ├── ipc.ts                # IPC 通道类型
-    │   ├── database.ts           # 数据库表类型
-    │   └── index.ts
-    └── constants/                # 共享常量
-        └── index.ts
+└── shared/                        # 跨进程共享代码
+    ├── types/                    # 数据库表与 IPC 协议类型
+    └── constants/
 ```
 
-## 🏗️ Architecture Layers
+## 🏗️ Architecture Layers (3-Layer Features)
 
-### 1. Infrastructure Layer (基础设施层)
-**Location**: `src/main/database`, `src/renderer/src/infra`
+通过对 Renderer 进程的深度精简，我们采用了扁平化的三层架构：
 
-- **SQLite Database**: 本地数据持久化
-- **IPC Communication**: 主进程与渲染进程通信
-- **Mock Generators**: 使用 Faker.js 生成测试数据
+### 1. Domain Layer (领域层)
+- **Location**: `features/*/domain`
+- **Responsibility**: 定义业务实体 (Entities) 和类型声明 (Types)。包含与 UI 无关的核心业务逻辑（如下拉刷新时间计算、状态判断等）。
 
-### 2. Data Layer (数据层)
-**Location**: `src/renderer/src/features/*/data`
+### 2. Store Layer (状态层)
+- **Location**: `features/*/store`
+- **Responsibility**: 使用 Zustand 直接调用 `api/*` 模块。负责将原始数据转换为实体对象并维护全局响应式状态。
 
-- **Repositories**: 数据访问抽象接口
-- **Data Sources**: Mock 和 SQLite 实现
-- **可切换性**: 通过接口实现 Mock ↔ 真实 API 无缝切换
-
-### 3. Domain Layer (领域层)
-**Location**: `src/renderer/src/features/*/domain`
-
-- **Entities**: 领域实体类 (User, Chat, Message)
-- **Business Logic**: 实体方法包含业务逻辑
-- **Types**: 领域特定类型定义
-
-### 4. Application Layer (应用层)
-**Location**: `src/renderer/src/features/*/application`
-
-- **Stores (Zustand)**: 全局状态管理
-- **Queries (React Query)**: 服务端状态管理 (预留)
-- **Services**: 业务用例编排 (预留)
-
-### 5. Presentation Layer (表现层)
-**Location**: `src/renderer/src/features/*/presentation`
-
-- **Components**: React 组件
-- **Pages**: 页面级组件
-- **Hooks**: UI 相关 hooks
+### 3. Presentation Layer (表现层)
+- **Location**: `features/*/components`
+- **Responsibility**: React 组件，通过 Store 获取状态。不直接感知 IPC 或 Main 进程逻辑。
 
 ## 🔧 Technology Stack
 

@@ -5,6 +5,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
+      invoke: (channel: string, data?: any) => Promise<any>
       db: {
         query: (params: QueryParams) => Promise<QueryResult>
         insert: (params: InsertParams) => Promise<InsertResult>
@@ -17,5 +18,6 @@ declare global {
         getCurrentUser: () => Promise<{ id: string; username: string; displayName: string; avatarUrl: string | null } | null>
       }
     }
+
   }
 }

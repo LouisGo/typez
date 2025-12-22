@@ -3,10 +3,14 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { DatabaseService } from './database'
-import { setupDatabaseHandlers } from './ipc'
+import { setupIPC } from './ipc'
 
 // Initialize database
-let db: DatabaseService
+let db: DatabaseService | null = null
+
+// 只在非 Mock 模式下初始化数据库
+const isDevelopment = process.env.NODE_ENV === 'development'
+const useMock = process.env.USE_MOCK === 'true' || isDevelopment
 
 function createWindow(): void {
   // Create the browser window.
@@ -47,9 +51,13 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Initialize database
-  db = new DatabaseService()
-  setupDatabaseHandlers(db)
+  // 初始化数据库 (仅在非 Mock 模式)
+  if (!useMock) {
+    db = new DatabaseService()
+  }
+
+  // 设置所有 IPC Handlers
+  setupIPC(db || undefined)
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
