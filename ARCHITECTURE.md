@@ -1,4 +1,4 @@
-# Typey IM Application - Architecture Overview
+# Typez IM Application - Architecture Overview
 
 ## 📁 Project Structure
 

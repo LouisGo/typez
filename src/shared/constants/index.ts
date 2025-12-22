@@ -6,11 +6,11 @@
  * 应用级常量定义
  */
 
-export const APP_NAME = 'Typey'
+export const APP_NAME = 'Typez'
 export const APP_VERSION = '1.0.0'
 
 // Database
-export const DB_NAME = 'typey.db'
+export const DB_NAME = 'typez.db'
 export const DB_VERSION = 1
 
 // IPC Channels - 与 types/ipc.ts 保持一致

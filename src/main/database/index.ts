@@ -116,7 +116,7 @@ export class DatabaseService {
   private db: Database.Database
 
   constructor(dbPath?: string) {
-    const path = dbPath || join(app.getPath('userData'), 'typey.db')
+    const path = dbPath || join(app.getPath('userData'), 'typez.db')
     this.db = new Database(path)
     this.db.pragma('journal_mode = WAL')
     this.initialize()

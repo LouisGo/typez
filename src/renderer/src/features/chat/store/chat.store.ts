@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { Chat } from '../domain/entities/chat.entity'
 import { Message } from '../domain/entities/message.entity'
-import { chatAPI } from '@/api'
+import { chatAPI } from '@infra/api'
 
 /**
  * Chat Store State

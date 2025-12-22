@@ -14,9 +14,9 @@
     "paths": {
       "@/*": ["src/renderer/src/*"],
       "@renderer/*": ["src/renderer/src/*"],
-      "@shared/*": ["src/shared/*"],
-      "@features/*": ["src/renderer/src/features/*"],
       "@components/*": ["src/renderer/src/components/*"],
+      "@shared/*": ["src/shared/*"],
+      "@infra/*": ["src/renderer/src/infra/*"]
     }
   }
 }

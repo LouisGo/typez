@@ -1,33 +1,57 @@
-import type { PropsWithChildren } from 'react'
-import React from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, Outlet, LinkProps } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
 
-import { cn } from '@renderer/shared/lib/cn'
+import { Button } from '@components/ui/button'
 
-export function AppShell({ children }: PropsWithChildren) {
+type NavItem = {
+  to: LinkProps['to']
+  label: string
+}
+
+const navItems: NavItem[] = [
+  { to: '/chats', label: '聊天' },
+  { to: '/contacts', label: '联系人' },
+  { to: '/settings', label: '设置' },
+]
+
+export function AppShell() {
   return (
     <div className="h-screen w-screen bg-background text-foreground">
       <div className="mx-auto flex h-full max-w-6xl flex-col">
         <header className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-md bg-primary" />
+            <div className="h-8 w-8 rounded-full bg-primary flex justify-center items-center border border-red-300 text-red-300">
+              X
+            </div>
             <div className="leading-tight">
-              <div className="text-sm font-semibold">Typey</div>
-              <div className="text-xs text-muted-foreground">Telegram-like IM (Electron)</div>
+              <div className="text-sm font-semibold">typez</div>
+              <div className="text-xs text-muted-foreground">we will fuck typex soon</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              to="/chats"
-              className={cn(
-                'inline-flex h-9 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-secondary-foreground transition-colors hover:opacity-90'
-              )}
-            >
-              Chats
-            </Link>
+            <nav className="flex items-center gap-2">
+              {navItems.map((item) => (
+                <Button key={item.to} variant="secondary" size="sm" asChild>
+                  <Link to={item.to}>{item.label}</Link>
+                </Button>
+              ))}
+            </nav>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/auth/login">登录</Link>
+            </Button>
           </div>
         </header>
-        <main className="min-h-0 flex-1">{children}</main>
+        <main className="min-h-0 flex-1">
+          <motion.div
+            key="route"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+            className="h-full"
+          >
+            <Outlet />
+          </motion.div>
+        </main>
       </div>
     </div>
   )

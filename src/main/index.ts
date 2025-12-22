@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { DatabaseService } from './database'
 import { setupIPC } from './ipc'
+import { getWindowOptions, setupWindowStateListeners } from './utils/window-state'
 
 // Initialize database
 let db: DatabaseService | null = null
@@ -13,10 +14,12 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 const useMock = process.env.USE_MOCK === 'true' || isDevelopment
 
 function createWindow(): void {
+  // 获取保存的窗口状态（位置和大小）
+  const windowOptions = getWindowOptions()
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    ...windowOptions,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -25,6 +28,9 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  // 设置窗口状态监听器，自动保存窗口位置和大小
+  setupWindowStateListeners(mainWindow)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

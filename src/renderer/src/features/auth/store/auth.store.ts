@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { User } from '../domain/entities/user.entity'
-import { authAPI } from '@/api'
+import { authAPI } from '@infra/api'
 import type { LoginCredentials, RegisterData } from '../domain/types'
 
 /**

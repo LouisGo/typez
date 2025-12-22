@@ -1,2 +1,2 @@
-export * from './cn'
+export { cn } from '../lib/cn'
 export * from './date'
