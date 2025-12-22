@@ -16,8 +16,7 @@
       "@renderer/*": ["src/renderer/src/*"],
       "@shared/*": ["src/shared/*"],
       "@features/*": ["src/renderer/src/features/*"],
-      "@components/*": ["src/renderer/src/components/*"]
+      "@components/*": ["src/renderer/src/components/*"],
     }
   }
-
 }

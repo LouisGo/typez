@@ -23,6 +23,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.84.2",
     "@tanstack/react-router": "^1.132.7",
     "better-sqlite3": "^12.5.0",
@@ -37,6 +38,7 @@
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
@@ -54,11 +56,14 @@
     "prettier": "^3.7.4",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6"
+    "vite": "^7.3.0"
   },
   "pnpm": {
+    "overrides": {
+      "vite": "^7.3.0"
+    },
     "onlyBuiltDependencies": [
       "better-sqlite3",
       "electron",
