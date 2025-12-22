@@ -1,0 +1,103 @@
+-- ============================================
+-- Initial Database Schema
+-- ============================================
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  avatar_url TEXT,
+  phone TEXT,
+  bio TEXT,
+  status TEXT NOT NULL DEFAULT 'offline' CHECK(status IN ('online', 'offline', 'away', 'busy')),
+  last_seen INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+-- Chats table
+CREATE TABLE IF NOT EXISTS chats (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL CHECK(type IN ('private', 'group', 'channel')),
+  title TEXT,
+  avatar_url TEXT,
+  description TEXT,
+  member_count INTEGER NOT NULL DEFAULT 1,
+  last_message_id TEXT,
+  last_message_at INTEGER,
+  pinned INTEGER NOT NULL DEFAULT 0,
+  muted INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+-- Messages table
+CREATE TABLE IF NOT EXISTS messages (
+  id TEXT PRIMARY KEY,
+  chat_id TEXT NOT NULL,
+  sender_id TEXT NOT NULL,
+  content TEXT NOT NULL,
+  type TEXT NOT NULL CHECK(type IN ('text', 'image', 'video', 'file', 'audio', 'voice')),
+  reply_to_id TEXT,
+  forwarded_from_id TEXT,
+  edited INTEGER NOT NULL DEFAULT 0,
+  read INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+  FOREIGN KEY (sender_id) REFERENCES users(id),
+  FOREIGN KEY (reply_to_id) REFERENCES messages(id) ON DELETE SET NULL
+);
+
+-- Chat members table
+CREATE TABLE IF NOT EXISTS chat_members (
+  id TEXT PRIMARY KEY,
+  chat_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'member' CHECK(role IN ('owner', 'admin', 'member')),
+  joined_at INTEGER NOT NULL,
+  left_at INTEGER,
+  FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(chat_id, user_id)
+);
+
+-- Contacts table
+CREATE TABLE IF NOT EXISTS contacts (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  contact_user_id TEXT NOT NULL,
+  nickname TEXT,
+  blocked INTEGER NOT NULL DEFAULT 0,
+  favorite INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (contact_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(user_id, contact_user_id)
+);
+
+-- Media table
+CREATE TABLE IF NOT EXISTS media (
+  id TEXT PRIMARY KEY,
+  message_id TEXT NOT NULL,
+  type TEXT NOT NULL CHECK(type IN ('image', 'video', 'file', 'audio')),
+  url TEXT NOT NULL,
+  thumbnail_url TEXT,
+  file_name TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  mime_type TEXT NOT NULL,
+  width INTEGER,
+  height INTEGER,
+  duration INTEGER,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_chat_members_chat_id ON chat_members(chat_id);
+CREATE INDEX IF NOT EXISTS idx_chat_members_user_id ON chat_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts(user_id);
+CREATE INDEX IF NOT EXISTS idx_media_message_id ON media(message_id);
