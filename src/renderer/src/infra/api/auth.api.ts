@@ -34,5 +34,3 @@ export const authAPI = {
     return apiClient.invoke<UserTable | null>('auth:getCurrentUser', { userId })
   }
 }
-
-

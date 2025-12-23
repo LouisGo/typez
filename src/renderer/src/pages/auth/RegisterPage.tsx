@@ -10,7 +10,7 @@ export function RegisterPage() {
     <Card className="p-6">
       <div className="space-y-1">
         <div className="text-xl font-semibold">注册</div>
-        <div className="text-sm text-muted-foreground">创建新账号（UI MVP 占位）</div>
+        <div className="text-muted-foreground text-sm">创建新账号（UI MVP 占位）</div>
       </div>
 
       <Separator className="my-5" />
@@ -45,5 +45,3 @@ export function RegisterPage() {
     </Card>
   )
 }
-
-

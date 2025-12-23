@@ -12,7 +12,7 @@ export class ChatGenerator {
   static generateOne(type?: ChatType): ChatTable {
     const now = Date.now()
     const chatType = type || faker.helpers.arrayElement<ChatType>(['private', 'group', 'channel'])
-    
+
     return {
       id: faker.string.uuid(),
       type: chatType,
@@ -25,7 +25,7 @@ export class ChatGenerator {
       pinned: faker.datatype.boolean(0.1), // 10% pinned
       muted: faker.datatype.boolean(0.05), // 5% muted
       created_at: now - faker.number.int({ min: 86400000, max: 31536000000 }),
-      updated_at: now,
+      updated_at: now
     }
   }
 }

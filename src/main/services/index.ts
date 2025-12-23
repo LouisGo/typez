@@ -19,11 +19,6 @@ if (!useMock) {
 }
 
 // 导出服务实例
-export const authService: IAuthService = useMock
-  ? new MockAuthService()
-  : new AuthService(db!)
+export const authService: IAuthService = useMock ? new MockAuthService() : new AuthService(db!)
 
-export const chatService: IChatService = useMock
-  ? new MockChatService()
-  : new ChatService(db!)
-
+export const chatService: IChatService = useMock ? new MockChatService() : new ChatService(db!)

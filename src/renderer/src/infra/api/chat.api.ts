@@ -33,5 +33,3 @@ export const chatAPI = {
     return apiClient.invoke<MessageTable>('chat:sendMessage', { chatId, content })
   }
 }
-
-

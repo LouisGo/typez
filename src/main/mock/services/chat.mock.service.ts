@@ -34,7 +34,11 @@ export class MockChatService implements IChatService {
     return this.chats.find((chat) => chat.id === id) || null
   }
 
-  async getMessages(chatId: string, limit: number = 50, offset: number = 0): Promise<MessageTable[]> {
+  async getMessages(
+    chatId: string,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<MessageTable[]> {
     await this.delay(300)
     const chatMessages = this.messages.get(chatId) || []
     return chatMessages.slice(offset, offset + limit)
@@ -45,13 +49,13 @@ export class MockChatService implements IChatService {
     const newMessage = MessageGenerator.generateOne(chatId)
     newMessage.content = content
     newMessage.created_at = Date.now()
-    
+
     const chatMessages = this.messages.get(chatId) || []
     chatMessages.unshift(newMessage) // 新消息放在开头（模拟倒序）
     this.messages.set(chatId, chatMessages)
-    
+
     // 更新最后一条消息
-    const chat = this.chats.find(c => c.id === chatId)
+    const chat = this.chats.find((c) => c.id === chatId)
     if (chat) {
       chat.last_message_id = newMessage.id
       chat.last_message_at = newMessage.created_at
@@ -61,6 +65,6 @@ export class MockChatService implements IChatService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }

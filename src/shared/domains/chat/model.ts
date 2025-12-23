@@ -39,5 +39,3 @@ export interface Page<T> {
   items: T[]
   next?: PageCursor
 }
-
-

@@ -61,13 +61,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const messageTable = await chatAPI.sendMessage(chatId, content)
       const newMessage = Message.fromTable(messageTable)
-      
+
       const currentMessages = get().messages
       set({ messages: [...currentMessages, newMessage] })
-      
+
       // 同时也更新聊天列表中的最后一条消息信息
       const chats = get().chats
-      const updatedChats = chats.map(chat => {
+      const updatedChats = chats.map((chat) => {
         if (chat.id === chatId) {
           return {
             ...chat,

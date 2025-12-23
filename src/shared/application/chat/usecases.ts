@@ -14,5 +14,3 @@ export function createChatUsecases(repo: ChatRepository): ChatUsecases {
     sendMessage: (chatId, text) => repo.sendMessage(chatId, text)
   }
 }
-
-

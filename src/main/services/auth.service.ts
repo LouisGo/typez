@@ -43,7 +43,7 @@ export class AuthService implements IAuthService {
 
     const now = Date.now()
     const userId = crypto.randomUUID()
-    
+
     await this.db.insert({
       table: 'users',
       data: {
@@ -86,4 +86,3 @@ export class AuthService implements IAuthService {
     return result.rows.length > 0 ? (result.rows[0] as UserTable) : null
   }
 }
-

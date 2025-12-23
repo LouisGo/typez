@@ -10,7 +10,7 @@ export function LoginPage() {
     <Card className="p-6">
       <div className="space-y-1">
         <div className="text-xl font-semibold">登录</div>
-        <div className="text-sm text-muted-foreground">使用账号密码进入 Typez（UI MVP 占位）</div>
+        <div className="text-muted-foreground text-sm">使用账号密码进入 Typez（UI MVP 占位）</div>
       </div>
 
       <Separator className="my-5" />
@@ -41,5 +41,3 @@ export function LoginPage() {
     </Card>
   )
 }
-
-

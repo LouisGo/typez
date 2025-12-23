@@ -11,16 +11,15 @@ const api = {
     query: (params: unknown) => ipcRenderer.invoke('db:query', params),
     insert: (params: unknown) => ipcRenderer.invoke('db:insert', params),
     update: (params: unknown) => ipcRenderer.invoke('db:update', params),
-    delete: (params: unknown) => ipcRenderer.invoke('db:delete', params),
+    delete: (params: unknown) => ipcRenderer.invoke('db:delete', params)
   },
   // Auth operations (保留兼容性)
   auth: {
     login: (params: unknown) => ipcRenderer.invoke('auth:login', params),
     logout: () => ipcRenderer.invoke('auth:logout'),
-    getCurrentUser: () => ipcRenderer.invoke('auth:getCurrentUser'),
-  },
+    getCurrentUser: () => ipcRenderer.invoke('auth:getCurrentUser')
+  }
 }
-
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

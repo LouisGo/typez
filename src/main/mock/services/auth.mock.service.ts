@@ -12,7 +12,7 @@ export class MockAuthService implements IAuthService {
   constructor() {
     // 预生成一些测试用户
     const testUsers = UserGenerator.generate(10)
-    testUsers.forEach(user => this.users.set(user.id, user))
+    testUsers.forEach((user) => this.users.set(user.id, user))
   }
 
   async login(username: string, _password: string): Promise<UserTable> {
@@ -20,9 +20,7 @@ export class MockAuthService implements IAuthService {
     await this.delay(500)
 
     // 检查是否已有该用户名
-    const existingUser = Array.from(this.users.values()).find(
-      u => u.username === username
-    )
+    const existingUser = Array.from(this.users.values()).find((u) => u.username === username)
 
     if (existingUser) {
       existingUser.status = 'online'
@@ -34,7 +32,7 @@ export class MockAuthService implements IAuthService {
     const newUser = UserGenerator.generateOne()
     newUser.username = username
     newUser.status = 'online'
-    
+
     this.users.set(newUser.id, newUser)
 
     return newUser
@@ -68,7 +66,6 @@ export class MockAuthService implements IAuthService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }
-

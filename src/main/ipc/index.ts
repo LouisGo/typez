@@ -12,7 +12,6 @@ export function setupIPC(db?: DatabaseService): void {
   }
   setupAuthHandlers()
   setupChatHandlers()
-  
+
   console.log('[IPC] 所有 IPC Handlers 已注册')
 }
-

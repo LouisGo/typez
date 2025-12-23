@@ -9,15 +9,31 @@ declare global {
       db: {
         query: (params: QueryParams) => Promise<QueryResult>
         insert: (params: InsertParams) => Promise<InsertResult>
-        update: (params: { table: string; data: Record<string, unknown>; where: Record<string, unknown> }) => Promise<{ rowsAffected: number }>
-        delete: (params: { table: string; where: Record<string, unknown> }) => Promise<{ rowsAffected: number }>
+        update: (params: {
+          table: string
+          data: Record<string, unknown>
+          where: Record<string, unknown>
+        }) => Promise<{ rowsAffected: number }>
+        delete: (params: {
+          table: string
+          where: Record<string, unknown>
+        }) => Promise<{ rowsAffected: number }>
       }
       auth: {
-        login: (params: { username: string; password: string }) => Promise<{ id: string; username: string; displayName: string; avatarUrl: string | null }>
+        login: (params: { username: string; password: string }) => Promise<{
+          id: string
+          username: string
+          displayName: string
+          avatarUrl: string | null
+        }>
         logout: () => Promise<void>
-        getCurrentUser: () => Promise<{ id: string; username: string; displayName: string; avatarUrl: string | null } | null>
+        getCurrentUser: () => Promise<{
+          id: string
+          username: string
+          displayName: string
+          avatarUrl: string | null
+        } | null>
       }
     }
-
   }
 }

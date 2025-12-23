@@ -34,7 +34,7 @@ async function bootstrap(): Promise<void> {
   if (isDevelopment) {
     await new Promise((resolve) => setTimeout(resolve, 200))
   }
-  
+
   createMainWindow()
 }
 

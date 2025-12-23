@@ -19,13 +19,13 @@ export const IPC_CHANNELS = {
     QUERY: 'db:query',
     INSERT: 'db:insert',
     UPDATE: 'db:update',
-    DELETE: 'db:delete',
+    DELETE: 'db:delete'
   },
   AUTH: {
     LOGIN: 'auth:login',
     LOGOUT: 'auth:logout',
-    GET_CURRENT_USER: 'auth:getCurrentUser',
-  },
+    GET_CURRENT_USER: 'auth:getCurrentUser'
+  }
 } as const
 
 // Message limits

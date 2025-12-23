@@ -23,7 +23,11 @@ export class ChatService implements IChatService {
     return result.rows.length > 0 ? (result.rows[0] as ChatTable) : null
   }
 
-  async getMessages(chatId: string, limit: number = 50, offset: number = 0): Promise<MessageTable[]> {
+  async getMessages(
+    chatId: string,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<MessageTable[]> {
     const result = await this.db.query({
       table: 'messages',
       where: { chat_id: chatId }
@@ -35,9 +39,9 @@ export class ChatService implements IChatService {
   async sendMessage(chatId: string, content: string): Promise<MessageTable> {
     const now = Date.now()
     const messageId = crypto.randomUUID()
-    
+
     // 这里简化处理，实际需要从 session 获取 senderId
-    const senderId = 'placeholder' 
+    const senderId = 'placeholder'
 
     await this.db.insert({
       table: 'messages',
@@ -69,7 +73,7 @@ export class ChatService implements IChatService {
       table: 'messages',
       where: { id: messageId }
     })
-    
+
     return result.rows[0] as MessageTable
   }
 }

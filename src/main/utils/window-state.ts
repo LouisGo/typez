@@ -60,7 +60,7 @@ function saveWindowState(window: BrowserWindow): void {
       width: bounds.width,
       height: bounds.height,
       isMaximized,
-      isFullScreen,
+      isFullScreen
     }
 
     // 只有在窗口不是最大化或全屏时才保存位置
@@ -97,14 +97,9 @@ function ensureWindowIsVisible(state: WindowState): WindowState {
   }
 
   // 检查窗口是否在任何显示器的可见区域内
-  const isVisible = displays.some(display => {
+  const isVisible = displays.some((display) => {
     const { x, y, width, height } = display.bounds
-    return (
-      state.x! >= x &&
-      state.x! < x + width &&
-      state.y! >= y &&
-      state.y! < y + height
-    )
+    return state.x! >= x && state.x! < x + width && state.y! >= y && state.y! < y + height
   })
 
   // 如果窗口不在可见区域内，使用主显示器的中心位置
@@ -136,7 +131,7 @@ export function getWindowOptions(): Electron.BrowserWindowConstructorOptions {
       width: DEFAULT_WIDTH,
       height: DEFAULT_HEIGHT,
       x: screenX + (screenWidth - DEFAULT_WIDTH) / 2,
-      y: screenY + (screenHeight - DEFAULT_HEIGHT) / 2,
+      y: screenY + (screenHeight - DEFAULT_HEIGHT) / 2
     }
   }
 
@@ -145,7 +140,7 @@ export function getWindowOptions(): Electron.BrowserWindowConstructorOptions {
 
   const options: Electron.BrowserWindowConstructorOptions = {
     width: safeState.width,
-    height: safeState.height,
+    height: safeState.height
   }
 
   // 只有在有位置信息且不是最大化时才设置位置
@@ -214,4 +209,3 @@ export function setupWindowStateListeners(window: BrowserWindow): void {
     }, 100)
   }
 }
-

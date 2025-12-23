@@ -1,12 +1,10 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 
-export function setupAppLifecycle(
-  callbacks: {
-    onQuit?: () => void
-    onActivate?: () => void
-  }
-): void {
+export function setupAppLifecycle(callbacks: {
+  onQuit?: () => void
+  onActivate?: () => void
+}): void {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 

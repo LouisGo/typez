@@ -5,5 +5,3 @@ export interface ChatRepository {
   getMessagesPage(chatId: ChatId, cursor: PageCursor): Promise<Page<Message>>
   sendMessage(chatId: ChatId, text: string): Promise<Message>
 }
-
-

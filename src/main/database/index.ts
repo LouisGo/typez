@@ -161,7 +161,7 @@ export class DatabaseService {
 
     return {
       rows,
-      total: rows.length,
+      total: rows.length
     }
   }
 
@@ -179,14 +179,18 @@ export class DatabaseService {
 
     return {
       id: result.lastInsertRowid.toString(),
-      rowsAffected: result.changes,
+      rowsAffected: result.changes
     }
   }
 
   /**
    * 更新数据
    */
-  update(params: { table: string; data: Record<string, unknown>; where: Record<string, unknown> }): { rowsAffected: number } {
+  update(params: {
+    table: string
+    data: Record<string, unknown>
+    where: Record<string, unknown>
+  }): { rowsAffected: number } {
     const setClause = Object.keys(params.data)
       .map((key) => `${key} = ?`)
       .join(', ')

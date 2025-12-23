@@ -9,7 +9,7 @@ export function SettingsPage() {
       <div className="mx-auto w-full max-w-2xl space-y-4">
         <div>
           <div className="text-lg font-semibold">设置</div>
-          <div className="mt-1 text-sm text-muted-foreground">UI MVP 占位：仅基础布局</div>
+          <div className="text-muted-foreground mt-1 text-sm">UI MVP 占位：仅基础布局</div>
         </div>
 
         <Card className="p-6">
@@ -35,7 +35,7 @@ export function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">清理缓存</div>
-              <div className="text-sm text-muted-foreground">仅 UI 占位，不会执行任何逻辑</div>
+              <div className="text-muted-foreground text-sm">仅 UI 占位，不会执行任何逻辑</div>
             </div>
             <Button variant="secondary" type="button">
               清理（占位）
@@ -46,5 +46,3 @@ export function SettingsPage() {
     </div>
   )
 }
-
-

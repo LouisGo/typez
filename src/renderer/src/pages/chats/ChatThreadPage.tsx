@@ -20,21 +20,21 @@ export function ChatThreadPage() {
 
       <div className="min-h-0 flex-1 overflow-auto p-4">
         <div className="space-y-3">
-          <div className="rounded-xl border bg-muted/10 p-4 text-sm text-muted-foreground">
+          <div className="bg-muted/10 text-muted-foreground rounded-xl border p-4 text-sm">
             （占位）消息列表区域：后续接入虚拟列表 / 分页 / 已读等逻辑
           </div>
 
           <div className="flex justify-start">
-            <div className="w-[min(520px,85%)] rounded-2xl bg-muted p-3">
-              <div className="h-3 w-28 rounded bg-background/60" />
-              <div className="mt-2 h-3 w-64 rounded bg-background/60" />
+            <div className="bg-muted w-[min(520px,85%)] rounded-2xl p-3">
+              <div className="bg-background/60 h-3 w-28 rounded" />
+              <div className="bg-background/60 mt-2 h-3 w-64 rounded" />
             </div>
           </div>
 
           <div className="flex justify-end">
-            <div className="w-[min(520px,85%)] rounded-2xl bg-primary p-3">
-              <div className="h-3 w-20 rounded bg-primary-foreground/70" />
-              <div className="mt-2 h-3 w-56 rounded bg-primary-foreground/70" />
+            <div className="bg-primary w-[min(520px,85%)] rounded-2xl p-3">
+              <div className="bg-primary-foreground/70 h-3 w-20 rounded" />
+              <div className="bg-primary-foreground/70 mt-2 h-3 w-56 rounded" />
             </div>
           </div>
         </div>
@@ -50,5 +50,3 @@ export function ChatThreadPage() {
     </div>
   )
 }
-
-

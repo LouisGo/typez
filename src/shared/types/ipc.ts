@@ -12,7 +12,7 @@ export interface IPCChannels {
   'db:insert': { params: InsertParams; result: InsertResult }
   'db:update': { params: UpdateParams; result: UpdateResult }
   'db:delete': { params: DeleteParams; result: DeleteResult }
-  
+
   // Auth operations
   'auth:login': { params: LoginParams; result: UserData }
   'auth:logout': { params: void; result: void }

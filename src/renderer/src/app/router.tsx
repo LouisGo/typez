@@ -1,4 +1,10 @@
-import { createRouter, createRootRoute, createRoute, redirect, Outlet } from '@tanstack/react-router'
+import {
+  createRouter,
+  createRootRoute,
+  createRoute,
+  redirect,
+  Outlet
+} from '@tanstack/react-router'
 
 import { AppShell } from '@renderer/app/shell/AppShell'
 import { AuthLayout } from '@renderer/app/layouts/AuthLayout'
@@ -19,61 +25,61 @@ const indexRoute = createRoute({
   path: '/',
   beforeLoad: () => {
     throw redirect({ to: '/auth/login' })
-  },
+  }
 })
 
 const authLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'auth',
-  component: AuthLayout,
+  component: AuthLayout
 })
 
 const loginRoute = createRoute({
   getParentRoute: () => authLayoutRoute,
   path: 'login',
-  component: LoginPage,
+  component: LoginPage
 })
 
 const registerRoute = createRoute({
   getParentRoute: () => authLayoutRoute,
   path: 'register',
-  component: RegisterPage,
+  component: RegisterPage
 })
 
 const appLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'app',
-  component: AppShell,
+  component: AppShell
 })
 
 const chatsLayoutRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: 'chats',
-  component: ChatsPage,
+  component: ChatsPage
 })
 
 const chatsIndexRoute = createRoute({
   getParentRoute: () => chatsLayoutRoute,
   path: '/',
-  component: ChatsIndexPage,
+  component: ChatsIndexPage
 })
 
 const chatThreadRoute = createRoute({
   getParentRoute: () => chatsLayoutRoute,
   path: '$chatId',
-  component: ChatThreadPage,
+  component: ChatThreadPage
 })
 
 const contactsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: 'contacts',
-  component: ContactsPage,
+  component: ContactsPage
 })
 
 const settingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: 'settings',
-  component: SettingsPage,
+  component: SettingsPage
 })
 
 const routeTree = rootRoute.addChildren([
@@ -82,8 +88,8 @@ const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([
     chatsLayoutRoute.addChildren([chatsIndexRoute, chatThreadRoute]),
     contactsRoute,
-    settingsRoute,
-  ]),
+    settingsRoute
+  ])
 ])
 
 export const router = createRouter({ routeTree })
@@ -93,5 +99,3 @@ declare module '@tanstack/react-router' {
     router: typeof router
   }
 }
-
-

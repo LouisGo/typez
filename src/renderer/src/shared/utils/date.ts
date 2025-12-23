@@ -19,14 +19,14 @@ export function formatDate(timestamp: number): string {
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
   })
 }
 
 export function formatTime(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString('en-US', {
     hour: '2-digit',
-    minute: '2-digit',
+    minute: '2-digit'
   })
 }
 
