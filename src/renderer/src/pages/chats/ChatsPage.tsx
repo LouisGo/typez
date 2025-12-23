@@ -5,6 +5,7 @@ import { Button } from '@components/ui/button'
 import { Card } from '@components/ui/card'
 import { Input } from '@components/ui/input'
 import { Separator } from '@components/ui/separator'
+import { cn } from '@/shared/utils'
 
 type ConversationItem = {
   id: string
@@ -17,7 +18,7 @@ const mockConversations: ConversationItem[] = [
   { id: 'mock-1', title: '产品讨论（占位）', lastMessage: '明天对齐一下需求', time: '09:12' },
   { id: 'mock-2', title: '设计评审（占位）', lastMessage: '这个圆角再大一点', time: '昨天' },
   { id: 'mock-3', title: '随机闲聊（占位）', lastMessage: '哈哈哈哈', time: '周五' },
-  { id: 'mock-4', title: '项目组（占位）', lastMessage: 'MVP 先跑起来', time: '12/20' },
+  { id: 'mock-4', title: '项目组（占位）', lastMessage: 'MVP 先跑起来', time: '12/20' }
 ]
 
 const ChatsSidebar = React.memo(function ChatsSidebar() {
@@ -50,23 +51,24 @@ const ChatsSidebar = React.memo(function ChatsSidebar() {
                 to="/chats/$chatId"
                 params={{ chatId: c.id }}
                 activeProps={{
-                  className:
-                    "relative bg-accent/80 text-accent-foreground ring-1 ring-ring/20 before:absolute before:left-1 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-primary before:content-['']",
+                  className: cn(
+                    "text-accent-foreground bg-accent/80 before:bg-primary ring-ring/20 relative ring-1 before:absolute before:top-2 before:bottom-2 before:left-1 before:w-1 before:rounded-full before:content-['']"
+                  )
                 }}
                 inactiveProps={{
-                  className: 'hover:bg-accent/50',
+                  className: cn('hover:bg-accent/50')
                 }}
               >
                 <div className="flex w-full items-center gap-3">
-                  <div className="h-9 w-9 shrink-0 rounded-full bg-muted flex justify-center items-center border border-amber-300 text-amber-300">
+                  <div className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-300 text-amber-300">
                     Y
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="truncate text-sm font-medium">{c.title}</div>
-                      <div className="shrink-0 text-xs text-muted-foreground">{c.time}</div>
+                      <div className="text-muted-foreground shrink-0 text-xs">{c.time}</div>
                     </div>
-                    <div className="truncate text-xs text-muted-foreground">{c.lastMessage}</div>
+                    <div className="text-muted-foreground truncate text-xs">{c.lastMessage}</div>
                   </div>
                 </div>
               </Link>
@@ -78,7 +80,7 @@ const ChatsSidebar = React.memo(function ChatsSidebar() {
   )
 })
 
-export function ChatsPage() {
+export function ChatsPage(): React.ReactElement {
   return (
     <div className="flex h-full min-h-0 gap-4 p-4">
       <ChatsSidebar />
@@ -91,5 +93,3 @@ export function ChatsPage() {
     </div>
   )
 }
-
-
