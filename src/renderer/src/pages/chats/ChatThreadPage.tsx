@@ -1,8 +1,9 @@
 import { useParams } from '@tanstack/react-router'
 
+import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
-import { Input } from '@components/ui/input'
 import { Separator } from '@components/ui/separator'
+import { Textarea } from '@components/ui/textarea'
 
 export function ChatThreadPage() {
   const { chatId } = useParams({ from: '/app/chats/$chatId' })
@@ -10,7 +11,12 @@ export function ChatThreadPage() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center justify-between px-4 py-3">
-        <div className="text-sm font-semibold">会话：{chatId}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-semibold">会话</div>
+          <Badge variant="secondary" className="font-mono">
+            {chatId}
+          </Badge>
+        </div>
         <Button variant="secondary" size="sm" type="button">
           详情（占位）
         </Button>
@@ -43,7 +49,7 @@ export function ChatThreadPage() {
       <Separator />
       <div className="p-3">
         <div className="flex gap-2">
-          <Input placeholder="输入消息…" />
+          <Textarea className="min-h-10 resize-none" placeholder="输入消息…" rows={1} />
           <Button type="button">发送（占位）</Button>
         </div>
       </div>

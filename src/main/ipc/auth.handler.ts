@@ -1,5 +1,5 @@
-import { ipcMain } from 'electron'
 import { authService } from '../services'
+import { createHandler } from './utils'
 
 /**
  * 认证 IPC Handlers
@@ -7,46 +7,22 @@ import { authService } from '../services'
  */
 export function setupAuthHandlers(): void {
   // 登录
-  ipcMain.handle('auth:login', async (_, { username, password }) => {
-    try {
-      console.log('[IPC] auth:login', { username })
-      return await authService.login(username, password)
-    } catch (error: any) {
-      console.error('[IPC] auth:login error:', error)
-      throw error
-    }
+  createHandler('auth:login', async (params) => {
+    return await authService.login(params.username, params.password)
   })
 
   // 注册
-  ipcMain.handle('auth:register', async (_, { username, displayName, password }) => {
-    try {
-      console.log('[IPC] auth:register', { username, displayName })
-      return await authService.register(username, displayName, password)
-    } catch (error: any) {
-      console.error('[IPC] auth:register error:', error)
-      throw error
-    }
+  createHandler('auth:register', async (params) => {
+    return await authService.register(params.username, params.displayName, params.password)
   })
 
   // 登出
-  ipcMain.handle('auth:logout', async (_, { userId }) => {
-    try {
-      console.log('[IPC] auth:logout', { userId })
-      await authService.logout(userId)
-    } catch (error: any) {
-      console.error('[IPC] auth:logout error:', error)
-      throw error
-    }
+  createHandler('auth:logout', async (params) => {
+    await authService.logout(params.userId)
   })
 
   // 获取当前用户
-  ipcMain.handle('auth:getCurrentUser', async (_, { userId }) => {
-    try {
-      console.log('[IPC] auth:getCurrentUser', { userId })
-      return await authService.getCurrentUser(userId)
-    } catch (error: any) {
-      console.error('[IPC] auth:getCurrentUser error:', error)
-      throw error
-    }
+  createHandler('auth:getCurrentUser', async (params) => {
+    return await authService.getCurrentUser(params.userId)
   })
 }

@@ -1,11 +1,11 @@
 import React from 'react'
-import { Link, Outlet } from '@tanstack/react-router'
+import { Outlet } from '@tanstack/react-router'
 
 import { Button } from '@components/ui/button'
-import { Card } from '@components/ui/card'
+import { Card, CardContent, CardHeader } from '@components/ui/card'
 import { Input } from '@components/ui/input'
 import { Separator } from '@components/ui/separator'
-import { cn } from '@/shared/utils'
+import { ConversationListItem } from '@components/business/conversation'
 
 type ConversationItem = {
   id: string
@@ -24,58 +24,38 @@ const mockConversations: ConversationItem[] = [
 const ChatsSidebar = React.memo(function ChatsSidebar() {
   return (
     <Card className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden">
-      <div className="p-4">
+      <CardHeader className="p-4 pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm font-semibold">会话</div>
           <Button size="sm" variant="secondary" type="button">
             新建（占位）
           </Button>
         </div>
-        <div className="mt-3">
+        <div className="pt-3">
           <Input placeholder="搜索会话…" />
         </div>
-      </div>
+      </CardHeader>
 
       <Separator />
 
-      <div className="min-h-0 flex-1 overflow-auto p-2">
+      <CardContent className="min-h-0 flex-1 overflow-auto p-2">
         <div className="space-y-1">
           {mockConversations.map((c) => (
-            <Button
+            <ConversationListItem
               key={c.id}
-              variant="ghost"
-              className="h-auto w-full justify-start rounded-lg px-3 py-2"
-              asChild
-            >
-              <Link
-                to="/chats/$chatId"
-                params={{ chatId: c.id }}
-                activeProps={{
-                  className: cn(
-                    "text-accent-foreground bg-accent/80 before:bg-primary ring-ring/20 relative ring-1 before:absolute before:top-2 before:bottom-2 before:left-1 before:w-1 before:rounded-full before:content-['']"
-                  )
-                }}
-                inactiveProps={{
-                  className: cn('hover:bg-accent/50')
-                }}
-              >
-                <div className="flex w-full items-center gap-3">
-                  <div className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-300 text-amber-300">
-                    Y
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <div className="truncate text-sm font-medium">{c.title}</div>
-                      <div className="text-muted-foreground shrink-0 text-xs">{c.time}</div>
-                    </div>
-                    <div className="text-muted-foreground truncate text-xs">{c.lastMessage}</div>
-                  </div>
-                </div>
-              </Link>
-            </Button>
+              conversation={{
+                id: c.id,
+                title: c.title,
+                lastMessage: c.lastMessage,
+                time: c.time,
+                avatarFallback: 'Y'
+              }}
+              to="/chats/$chatId"
+              params={{ chatId: c.id }}
+            />
           ))}
         </div>
-      </div>
+      </CardContent>
     </Card>
   )
 })

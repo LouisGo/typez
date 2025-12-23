@@ -1,5 +1,5 @@
-import { ipcMain } from 'electron'
 import type { DatabaseService } from '../database'
+import { createHandler } from './utils'
 
 /**
  * 数据库 IPC Handlers
@@ -7,22 +7,22 @@ import type { DatabaseService } from '../database'
  */
 export function setupDatabaseHandlers(db: DatabaseService): void {
   // Query handler
-  ipcMain.handle('db:query', async (_, params) => {
+  createHandler('db:query', async (params) => {
     return db.query(params)
   })
 
   // Insert handler
-  ipcMain.handle('db:insert', async (_, params) => {
+  createHandler('db:insert', async (params) => {
     return db.insert(params)
   })
 
   // Update handler
-  ipcMain.handle('db:update', async (_, params) => {
+  createHandler('db:update', async (params) => {
     return db.update(params)
   })
 
   // Delete handler
-  ipcMain.handle('db:delete', async (_, params) => {
+  createHandler('db:delete', async (params) => {
     return db.delete(params)
   })
 }

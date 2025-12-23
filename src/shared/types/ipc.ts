@@ -2,9 +2,15 @@
 // IPC Channel Definitions
 // ============================================
 
+import type { UserTable, ChatTable, MessageTable } from './database'
+
 /**
  * 定义主进程和渲染进程之间的 IPC 通信接口
  * 使用类型安全的通道定义，确保编译时检查
+ *
+ * 每个 channel 定义包含：
+ * - params: 请求参数类型
+ * - result: 响应结果类型
  */
 export interface IPCChannels {
   // Database operations
@@ -14,10 +20,36 @@ export interface IPCChannels {
   'db:delete': { params: DeleteParams; result: DeleteResult }
 
   // Auth operations
-  'auth:login': { params: LoginParams; result: UserData }
-  'auth:logout': { params: void; result: void }
-  'auth:getCurrentUser': { params: void; result: UserData | null }
+  'auth:login': { params: LoginParams; result: UserTable }
+  'auth:register': { params: RegisterParams; result: UserTable }
+  'auth:logout': { params: LogoutParams; result: void }
+  'auth:getCurrentUser': { params: GetCurrentUserParams; result: UserTable | null }
+
+  // Chat operations
+  'chat:getChats': { params: void; result: ChatTable[] }
+  'chat:getChatById': { params: GetChatByIdParams; result: ChatTable | null }
+  'chat:getMessages': { params: GetMessagesParams; result: MessageTable[] }
+  'chat:sendMessage': { params: SendMessageParams; result: MessageTable }
 }
+
+// ============================================
+// Type Utilities
+// ============================================
+
+/**
+ * 提取 IPC Channel 的参数类型
+ */
+export type IPCParams<Channel extends keyof IPCChannels> = IPCChannels[Channel]['params']
+
+/**
+ * 提取 IPC Channel 的返回类型
+ */
+export type IPCResult<Channel extends keyof IPCChannels> = IPCChannels[Channel]['result']
+
+/**
+ * 提取所有 IPC Channel 名称的联合类型
+ */
+export type IPCChannel = keyof IPCChannels
 
 // Database operation types
 export interface QueryParams {
@@ -62,15 +94,44 @@ export interface DeleteResult {
   rowsAffected: number
 }
 
-// Auth types
+// ============================================
+// Auth Types
+// ============================================
+
 export interface LoginParams {
   username: string
   password: string
 }
 
-export interface UserData {
-  id: string
+export interface RegisterParams {
   username: string
   displayName: string
-  avatarUrl: string | null
+  password: string
+}
+
+export interface LogoutParams {
+  userId: string
+}
+
+export interface GetCurrentUserParams {
+  userId: string
+}
+
+// ============================================
+// Chat Types
+// ============================================
+
+export interface GetChatByIdParams {
+  chatId: string
+}
+
+export interface GetMessagesParams {
+  chatId: string
+  limit?: number
+  offset?: number
+}
+
+export interface SendMessageParams {
+  chatId: string
+  content: string
 }
