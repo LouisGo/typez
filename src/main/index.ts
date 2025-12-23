@@ -1,102 +1,42 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { app, ipcMain } from 'electron'
 import { DatabaseService } from './database'
 import { setupIPC } from './ipc'
-import { getWindowOptions, setupWindowStateListeners } from './utils/window-state'
+import { setupAppLifecycle } from './lifecycle'
+import { installDevTools } from './utils/devtools'
+import { createMainWindow } from './windows/main'
 
-// Initialize database
-let db: DatabaseService | null = null
-
-// 只在非 Mock 模式下初始化数据库
+// Initialization configuration
 const isDevelopment = process.env.NODE_ENV === 'development'
 const useMock = process.env.USE_MOCK === 'true' || isDevelopment
+let db: DatabaseService | null = null
 
-function createWindow(): void {
-  // 获取保存的窗口状态（位置和大小）
-  const windowOptions = getWindowOptions()
+async function bootstrap(): Promise<void> {
+  // 1. Install DevTools (Development only)
+  await installDevTools()
 
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    ...windowOptions,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  // 设置窗口状态监听器，自动保存窗口位置和大小
-  setupWindowStateListeners(mainWindow)
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
-
-  // 初始化数据库 (仅在非 Mock 模式)
+  // 2. Initialize Core Services (Database)
   if (!useMock) {
     db = new DatabaseService()
   }
 
-  // 设置所有 IPC Handlers
+  // 3. Setup IPC Handlers
   setupIPC(db || undefined)
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  // 4. Setup App Lifecycle & Shortcuts
+  setupAppLifecycle({
+    onQuit: () => db?.close(),
+    onActivate: () => createMainWindow()
   })
-})
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    db?.close()
-    app.quit()
+  // 5. Create Main Window
+  // Small delay to ensure DevTools are fully ready if needed
+  if (isDevelopment) {
+    await new Promise((resolve) => setTimeout(resolve, 200))
   }
-})
+  
+  createMainWindow()
+}
 
-app.on('before-quit', () => {
-  db?.close()
-})
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+// Start application
+app.whenReady().then(bootstrap)
