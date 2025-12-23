@@ -49,7 +49,7 @@ export function LoginPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {loginMutation.isError && (
-              <div className="bg-destructive/15 text-destructive rounded-md p-3 text-sm">
+              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
                 {loginMutation.error instanceof Error
                   ? loginMutation.error.message
                   : '登录失败，请检查用户名和密码'}
@@ -98,12 +98,7 @@ export function LoginPage() {
                 )}
               />
             </FieldGroup>
-            <Button
-              className="w-full"
-              variant="default"
-              type="submit"
-              disabled={loginMutation.isPending}
-            >
+            <Button className="w-full" type="submit" disabled={loginMutation.isPending}>
               {loginMutation.isPending ? '登录中...' : '登录'}
             </Button>
           </form>

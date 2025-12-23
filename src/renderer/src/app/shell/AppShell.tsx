@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 
 import { Button } from '@components/ui/button'
 import { useAuthStore } from '@/stores'
+import { ModeToggle } from '@/components/theme/ModeToggle'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 type NavItem = {
   to: LinkProps['to']
@@ -18,26 +20,29 @@ const navItems: NavItem[] = [
 export function AppShell() {
   const { user } = useAuthStore()
   return (
-    <div className="bg-background text-foreground h-screen w-screen">
+    <div className="h-screen w-screen bg-background text-foreground">
       <div className="mx-auto flex h-full max-w-6xl flex-col">
         <header className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-full border border-red-300 text-red-300">
-              {user?.username.charAt(0).toUpperCase()}
-            </div>
+            <Avatar className="h-9 w-9 border border-blue-300">
+              <AvatarFallback className="bg-muted text-blue-300">
+                {user?.username.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.username}</div>
-              <div className="text-muted-foreground text-xs">we will fuck typex soon</div>
+              <div className="text-xs text-muted-foreground">we will fuck typex soon</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <nav className="flex items-center gap-2">
               {navItems.map((item) => (
-                <Button key={item.to} variant="secondary" size="sm" asChild>
+                <Button key={item.to} variant="outline" size="sm" asChild>
                   <Link to={item.to}>{item.label}</Link>
                 </Button>
               ))}
             </nav>
+            <ModeToggle />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/auth/login">登录</Link>
             </Button>
