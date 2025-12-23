@@ -34,6 +34,13 @@ export default defineConfig({
         '@infra': resolve('src/renderer/src/infra')
       }
     },
-    plugins: [react(), tailwindcss() as any]
+    plugins: [
+      react({
+        babel: {
+          plugins: ['babel-plugin-react-compiler']
+        }
+      }),
+      tailwindcss() as any
+    ]
   }
 })
