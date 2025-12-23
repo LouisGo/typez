@@ -20,43 +20,53 @@ src/
 ├── preload/                       # Preload 脚本 (IPC 桥接)
 │
 ├── renderer/src/                  # 渲染进程 (薄客户端)
-│   ├── api/                       # API 客户端层 (类比 HTTP 客户端)
-│   │   ├── client.ts              # 拦截器与核心调用逻辑
-│   │   ├── auth.api.ts
-│   │   └── chat.api.ts
-│   ├── features/                  # 功能模块 (3层扁平化)
-│   │   ├── auth/
-│   │   │   ├── domain/           # 领域类型与实体
-│   │   │   ├── store/            # 状态管理 (Zustand + API)
-│   │   │   └── components/       # UI 组件
-│   │   └── chat/...
-│   ├── app/                       # 全局配置与容器
+│   ├── infra/                     # 基础设施层
+│   │   └── api/                   # API 客户端层 (IPC 调用)
+│   │       ├── client.ts          # 拦截器与核心调用逻辑
+│   │       ├── auth.api.ts
+│   │       └── chat.api.ts
 │   ├── pages/                     # 路由页面 (View 层)
-│   └── shared/                    # 共享组件与工具
+│   ├── components/                # UI 组件
+│   │   ├── business/             # 业务组件
+│   │   └── ui/                   # 通用 UI 组件
+│   ├── app/                       # 全局配置与容器
+│   └── shared/                    # 共享工具与类型
 │
 └── shared/                        # 跨进程共享代码
-    ├── types/                    # 数据库表与 IPC 协议类型
+    ├── types/                    # 类型定义
+    │   ├── database.ts           # 数据库表类型 (snake_case)
+    │   ├── models.ts             # 领域模型类型 (camelCase)
+    │   └── ipc.ts                # IPC 协议类型
     └── constants/
 ```
 
-## 🏗️ Architecture Layers (3-Layer Features)
+## 🏗️ Architecture Layers
 
-通过对 Renderer 进程的深度精简，我们采用了扁平化的三层架构：
+### Main Process (主进程) - 业务核心
 
-### 1. Domain Layer (领域层)
+- **Location**: `src/main/`
+- **职责**:
+  - 所有业务逻辑实现
+  - 数据库操作 (SQLite)
+  - 数据格式转换 (snake_case → camelCase)
+  - 返回最终格式的领域模型给 Renderer
 
-- **Location**: `features/*/domain`
-- **Responsibility**: 定义业务实体 (Entities) 和类型声明 (Types)。包含与 UI 无关的核心业务逻辑（如下拉刷新时间计算、状态判断等）。
+### Renderer Process (渲染进程) - 薄客户端
 
-### 2. Store Layer (状态层)
+- **Location**: `src/renderer/src/`
+- **职责**:
+  - UI 展示 (pages, components)
+  - UI 状态管理 (可选，仅 UI 相关状态)
+  - API 调用 (通过 IPC)
+  - 直接使用 Main 进程返回的最终数据，无需转换
 
-- **Location**: `features/*/store`
-- **Responsibility**: 使用 Zustand 直接调用 `api/*` 模块。负责将原始数据转换为实体对象并维护全局响应式状态。
+### Shared (共享代码)
 
-### 3. Presentation Layer (表现层)
-
-- **Location**: `features/*/components`
-- **Responsibility**: React 组件，通过 Store 获取状态。不直接感知 IPC 或 Main 进程逻辑。
+- **Location**: `src/shared/`
+- **职责**:
+  - 类型定义 (database, models, ipc)
+  - 常量定义
+  - 跨进程共享的工具函数
 
 ## 🔧 Technology Stack
 
@@ -78,24 +88,47 @@ src/
 ## 📊 Data Flow
 
 ```
-User Interaction (UI)
+Renderer Process (薄客户端)
         ↓
-   Component
+   UI Component (pages/components)
         ↓
-   Zustand Store / React Query
+   API Client (infra/api)
         ↓
-   Repository Interface
+   IPC (类型安全)
         ↓
-   Mock Data Source ←→ SQLite (via IPC) ←→ 真实 API (未来)
+Main Process (业务核心)
+        ↓
+   Service (业务逻辑)
+        ↓
+   Database (SQLite)
+        ↓
+   Transform (snake_case → camelCase)
+        ↓
+   Return Domain Model (camelCase)
+        ↓
+   IPC (类型安全)
+        ↓
+Renderer Process
+        ↓
+   Direct Use (无需转换)
 ```
+
+### 关键原则
+
+1. **类型优先**: 所有 IPC 通信完全类型安全，编译时检查
+2. **职责分明**: Main 进程处理所有业务逻辑和数据转换，Renderer 仅负责 UI
+3. **数据格式**: Main 进程返回 camelCase 格式的领域模型，Renderer 直接使用
+4. **无业务逻辑**: Renderer 中不包含任何业务逻辑，只负责展示
 
 ## 🎯 Key Features
 
 ### Type Safety (类型优先)
 
 - 所有模块从 TypeScript 类型开始定义
-- IPC 通信类型安全
-- 数据库表结构类型化
+- IPC 通信完全类型安全，支持自动类型推导
+- 数据库表结构类型化 (snake_case)
+- 领域模型类型化 (camelCase)
+- 类型工具函数 (`IPCParams<C>`, `IPCResult<C>`)
 
 ### Mock System (Mock 数据系统)
 
@@ -104,12 +137,12 @@ User Interaction (UI)
 - `MessageGenerator`: 生成 mock 消息数据
 - 支持大规模数据生成用于性能测试
 
-### Future-Proof (面向未来)
+### Data Transformation (数据转换)
 
-- Repository Pattern 支持数据源切换
-- 预留 React Query 用于真实 API
-- 预留 TanStack Router 用于路由
-- 预留 shadcn/ui 组件
+- Main 进程负责所有数据格式转换
+- 数据库层: snake_case (UserTable, ChatTable, MessageTable)
+- 领域模型层: camelCase (User, Chat, Message)
+- 转换工具: `src/main/utils/transformers.ts`
 
 ## 🚀 Getting Started
 

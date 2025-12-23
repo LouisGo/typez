@@ -15,6 +15,7 @@ export class UserGenerator {
       id: faker.string.uuid(),
       username: `user${index !== undefined ? index : faker.number.int({ min: 1000, max: 9999 })}`,
       display_name: faker.person.fullName(),
+      password: '123456', // Mock 模式使用固定密码，便于开发调试
       avatar_url: faker.image.avatar(),
       phone: faker.phone.number(),
       bio: faker.lorem.sentence(),

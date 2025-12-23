@@ -9,6 +9,7 @@
 
 export * from './database'
 export * from './ipc'
+export * from './auth-errors'
 
 // Re-export commonly used types
 export type { UserTable, ChatTable, MessageTable } from './database'

@@ -23,6 +23,9 @@
       ],
       "@infra/*": [
         "src/renderer/src/infra/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
       ]
     }
   }

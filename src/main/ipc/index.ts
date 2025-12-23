@@ -6,10 +6,8 @@ import type { DatabaseService } from '../database'
 /**
  * 统一初始化所有 IPC Handlers
  */
-export function setupIPC(db?: DatabaseService): void {
-  if (db) {
-    setupDatabaseHandlers(db)
-  }
+export function setupIPC(db: DatabaseService): void {
+  setupDatabaseHandlers(db)
   setupAuthHandlers()
   setupChatHandlers()
 

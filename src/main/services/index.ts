@@ -12,13 +12,11 @@ const useMock = process.env.USE_MOCK === 'true' || isDevelopment
 
 console.log(`[Services] 环境模式: ${isDevelopment ? '开发' : '生产'}, 使用 Mock: ${useMock}`)
 
-// 初始化数据库 (仅生产环境需要)
-let db: DatabaseService | null = null
-if (!useMock) {
-  db = new DatabaseService()
-}
+// 初始化数据库 (所有模式都需要，Mock 服务也存储到数据库)
+const db = new DatabaseService()
 
 // 导出服务实例
-export const authService: IAuthService = useMock ? new MockAuthService() : new AuthService(db!)
+// Mock 服务也使用数据库存储，便于后续迁移到真实服务
+export const authService: IAuthService = useMock ? new MockAuthService(db) : new AuthService(db)
 
-export const chatService: IChatService = useMock ? new MockChatService() : new ChatService(db!)
+export const chatService: IChatService = useMock ? new MockChatService() : new ChatService(db)

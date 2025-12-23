@@ -11,6 +11,7 @@ export interface UserTable {
   id: string
   username: string
   display_name: string
+  password: string
   avatar_url: string | null
   phone: string | null
   bio: string | null

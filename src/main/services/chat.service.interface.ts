@@ -1,11 +1,12 @@
-import type { ChatTable, MessageTable } from '@shared/types/database'
+import type { Chat, Message } from '@shared/types/models'
 
 /**
  * 聊天服务接口
+ * 返回 camelCase 格式的领域模型
  */
 export interface IChatService {
-  getChats(): Promise<ChatTable[]>
-  getChatById(id: string): Promise<ChatTable | null>
-  getMessages(chatId: string, limit?: number, offset?: number): Promise<MessageTable[]>
-  sendMessage(chatId: string, content: string): Promise<MessageTable>
+  getChats(): Promise<Chat[]>
+  getChatById(id: string): Promise<Chat | null>
+  getMessages(chatId: string, limit?: number, offset?: number): Promise<Message[]>
+  sendMessage(chatId: string, content: string): Promise<Message>
 }

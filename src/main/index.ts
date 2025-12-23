@@ -7,20 +7,19 @@ import { createMainWindow } from './windows/main'
 
 // Initialization configuration
 const isDevelopment = process.env.NODE_ENV === 'development'
-const useMock = process.env.USE_MOCK === 'true' || isDevelopment
-let db: DatabaseService | null = null
+
+// 所有模式都需要数据库（Mock 服务也存储到数据库）
+const db = new DatabaseService()
 
 async function bootstrap(): Promise<void> {
   // 1. Install DevTools (Development only)
   await installDevTools()
 
   // 2. Initialize Core Services (Database)
-  if (!useMock) {
-    db = new DatabaseService()
-  }
+  // 数据库已在上面初始化，Mock 服务也使用数据库存储
 
   // 3. Setup IPC Handlers
-  setupIPC(db || undefined)
+  setupIPC(db)
   ipcMain.on('ping', () => console.log('pong'))
 
   // 4. Setup App Lifecycle & Shortcuts

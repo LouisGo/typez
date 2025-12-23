@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
+  password TEXT NOT NULL,
   avatar_url TEXT,
   phone TEXT,
   bio TEXT,

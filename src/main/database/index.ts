@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
+  password TEXT NOT NULL,
   avatar_url TEXT,
   phone TEXT,
   bio TEXT,
@@ -119,12 +120,54 @@ export class DatabaseService {
     const path = dbPath || join(app.getPath('userData'), 'typez.db')
     this.db = new Database(path)
     this.db.pragma('journal_mode = WAL')
+    console.log('[Database] 已连接，路径:', path)
     this.initialize()
   }
 
   private initialize(): void {
     // 运行迁移脚本
     this.db.exec(INIT_SQL)
+
+    // 开发阶段：重置 users 表（MVP 重构）
+    // 仅在开发环境且显式启用 RESET_USERS 时重置，默认不重置
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const shouldResetUsers = process.env.RESET_USERS === 'true'
+    if (isDevelopment && shouldResetUsers) {
+      console.log('[Database] RESET_USERS=true，重置 users 表')
+      this.resetUsersTable()
+    }
+  }
+
+  /**
+   * 重置 users 表（仅开发阶段使用）
+   */
+  private resetUsersTable(): void {
+    try {
+      // 读取重置迁移脚本
+      const resetSQL = `
+        -- 删除旧表（如果存在）
+        DROP TABLE IF EXISTS users;
+
+        -- 重新创建 users 表
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY,
+          username TEXT NOT NULL UNIQUE,
+          display_name TEXT NOT NULL,
+          password TEXT NOT NULL,
+          avatar_url TEXT,
+          phone TEXT,
+          bio TEXT,
+          status TEXT NOT NULL DEFAULT 'offline' CHECK(status IN ('online', 'offline', 'away', 'busy')),
+          last_seen INTEGER NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
+      `
+      this.db.exec(resetSQL)
+      console.log('[Database] Users 表已重置（开发模式）')
+    } catch (error) {
+      console.error('[Database] 重置 users 表失败:', error)
+    }
   }
 
   /**

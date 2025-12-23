@@ -1,5 +1,7 @@
 import type { IChatService } from '../../services/chat.service.interface'
 import type { ChatTable, MessageTable } from '@shared/types/database'
+import type { Chat, Message } from '@shared/types/models'
+import { chatTableToChat, messageTableToMessage } from '../../utils/transformers'
 import { ChatGenerator, MessageGenerator } from '../generators'
 
 /**
@@ -24,27 +26,24 @@ export class MockChatService implements IChatService {
     })
   }
 
-  async getChats(): Promise<ChatTable[]> {
+  async getChats(): Promise<Chat[]> {
     await this.delay(300)
-    return this.chats
+    return this.chats.map(chatTableToChat)
   }
 
-  async getChatById(id: string): Promise<ChatTable | null> {
+  async getChatById(id: string): Promise<Chat | null> {
     await this.delay(200)
-    return this.chats.find((chat) => chat.id === id) || null
+    const chat = this.chats.find((chat) => chat.id === id) || null
+    return chat ? chatTableToChat(chat) : null
   }
 
-  async getMessages(
-    chatId: string,
-    limit: number = 50,
-    offset: number = 0
-  ): Promise<MessageTable[]> {
+  async getMessages(chatId: string, limit: number = 50, offset: number = 0): Promise<Message[]> {
     await this.delay(300)
     const chatMessages = this.messages.get(chatId) || []
-    return chatMessages.slice(offset, offset + limit)
+    return chatMessages.slice(offset, offset + limit).map(messageTableToMessage)
   }
 
-  async sendMessage(chatId: string, content: string): Promise<MessageTable> {
+  async sendMessage(chatId: string, content: string): Promise<Message> {
     await this.delay(200)
     const newMessage = MessageGenerator.generateOne(chatId)
     newMessage.content = content
@@ -61,7 +60,7 @@ export class MockChatService implements IChatService {
       chat.last_message_at = newMessage.created_at
     }
 
-    return newMessage
+    return messageTableToMessage(newMessage)
   }
 
   private delay(ms: number): Promise<void> {

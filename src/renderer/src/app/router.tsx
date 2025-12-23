@@ -15,6 +15,21 @@ import { ChatsIndexPage } from '@renderer/pages/chats/ChatsIndexPage'
 import { ChatThreadPage } from '@renderer/pages/chats/ChatThreadPage'
 import { ContactsPage } from '@renderer/pages/contacts/ContactsPage'
 import { SettingsPage } from '@renderer/pages/settings/SettingsPage'
+import { useAuthStore } from '@renderer/stores'
+
+/**
+ * 检查认证状态的工具函数
+ */
+async function checkAuth(): Promise<boolean> {
+  const state = useAuthStore.getState()
+
+  // 如果还未初始化，先初始化
+  if (!state.isInitialized) {
+    await state.initialize()
+  }
+
+  return useAuthStore.getState().isAuthenticated
+}
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />
@@ -23,15 +38,27 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  beforeLoad: () => {
-    throw redirect({ to: '/auth/login' })
+  beforeLoad: async () => {
+    const isAuth = await checkAuth()
+    if (isAuth) {
+      throw redirect({ to: '/chats' })
+    } else {
+      throw redirect({ to: '/auth/login' })
+    }
   }
 })
 
 const authLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'auth',
-  component: AuthLayout
+  component: AuthLayout,
+  beforeLoad: async () => {
+    // 如果已登录，重定向到应用首页
+    const isAuth = await checkAuth()
+    if (isAuth) {
+      throw redirect({ to: '/chats' })
+    }
+  }
 })
 
 const loginRoute = createRoute({
@@ -49,7 +76,14 @@ const registerRoute = createRoute({
 const appLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'app',
-  component: AppShell
+  component: AppShell,
+  beforeLoad: async () => {
+    // 路由守卫：未登录用户重定向到登录页
+    const isAuth = await checkAuth()
+    if (!isAuth) {
+      throw redirect({ to: '/auth/login' })
+    }
+  }
 })
 
 const chatsLayoutRoute = createRoute({

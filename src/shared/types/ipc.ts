@@ -2,7 +2,7 @@
 // IPC Channel Definitions
 // ============================================
 
-import type { UserTable, ChatTable, MessageTable } from './database'
+import type { User, Chat, Message } from './models'
 
 /**
  * 定义主进程和渲染进程之间的 IPC 通信接口
@@ -20,16 +20,16 @@ export interface IPCChannels {
   'db:delete': { params: DeleteParams; result: DeleteResult }
 
   // Auth operations
-  'auth:login': { params: LoginParams; result: UserTable }
-  'auth:register': { params: RegisterParams; result: UserTable }
+  'auth:login': { params: LoginParams; result: User }
+  'auth:register': { params: RegisterParams; result: User }
   'auth:logout': { params: LogoutParams; result: void }
-  'auth:getCurrentUser': { params: GetCurrentUserParams; result: UserTable | null }
+  'auth:getCurrentUser': { params: GetCurrentUserParams; result: User | null }
 
   // Chat operations
-  'chat:getChats': { params: void; result: ChatTable[] }
-  'chat:getChatById': { params: GetChatByIdParams; result: ChatTable | null }
-  'chat:getMessages': { params: GetMessagesParams; result: MessageTable[] }
-  'chat:sendMessage': { params: SendMessageParams; result: MessageTable }
+  'chat:getChats': { params: void; result: Chat[] }
+  'chat:getChatById': { params: GetChatByIdParams; result: Chat | null }
+  'chat:getMessages': { params: GetMessagesParams; result: Message[] }
+  'chat:sendMessage': { params: SendMessageParams; result: Message }
 }
 
 // ============================================
