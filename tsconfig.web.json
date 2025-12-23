@@ -5,7 +5,8 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/shared/**/*",
-    "src/preload/index.d.ts"
+    "src/contracts/**/*",
+    "src/sdk/**/*"
   ],
   "compilerOptions": {
     "composite": true,
@@ -26,6 +27,18 @@
       ],
       "@shared/*": [
         "src/shared/*"
+      ],
+      "@contracts/*": [
+        "src/contracts/*"
+      ],
+      "@contracts": [
+        "src/contracts/index.ts"
+      ],
+      "@sdk": [
+        "src/sdk/index.ts"
+      ],
+      "@sdk/*": [
+        "src/sdk/*"
       ]
     }
   }

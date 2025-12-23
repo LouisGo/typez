@@ -1,15 +1,15 @@
 [
   {
-    "name": "Typey Database (Development)",
+    "name": "Typez Database (Development)",
     "driver": "SQLite",
-    "description": "Typey 应用开发环境数据库",
+    "description": "Typez 应用开发环境数据库",
     "database": "${env:HOME}/Library/Application Support/electron/typez.db",
     "connectionTimeout": 15
   },
   {
-    "name": "Typey Database (Production)",
+    "name": "Typez Database (Production)",
     "driver": "SQLite",
-    "description": "Typey 应用生产环境数据库",
+    "description": "Typez 应用生产环境数据库",
     "database": "${env:HOME}/Library/Application Support/typez/typez.db",
     "connectionTimeout": 15
   }

@@ -49,7 +49,7 @@ export function RegisterPage() {
     <Card>
       <CardHeader className="pb-4">
         <CardTitle className="text-xl">注册</CardTitle>
-        <CardDescription>创建新账号，开始使用 Typey</CardDescription>
+        <CardDescription>创建新账号，开始使用 Typez</CardDescription>
       </CardHeader>
 
       <Separator />

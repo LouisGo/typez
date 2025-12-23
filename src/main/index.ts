@@ -1,12 +1,9 @@
-import { app, ipcMain } from 'electron'
+import { app } from 'electron'
 import { DatabaseService } from './database'
 import { setupIPC } from './ipc'
 import { setupAppLifecycle } from './lifecycle'
 import { installDevTools } from './utils/devtools'
 import { createMainWindow } from './windows/main'
-
-// Initialization configuration
-const isDevelopment = process.env.NODE_ENV === 'development'
 
 // 所有模式都需要数据库（Mock 服务也存储到数据库）
 const db = new DatabaseService()

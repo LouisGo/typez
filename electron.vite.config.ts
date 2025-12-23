@@ -8,7 +8,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@shared': resolve('src/shared'),
-        '@main': resolve('src/main')
+        '@main': resolve('src/main'),
+        '@contracts': resolve('src/contracts')
       }
     },
     build: {
@@ -20,7 +21,8 @@ export default defineConfig({
   preload: {
     resolve: {
       alias: {
-        '@shared': resolve('src/shared')
+        '@shared': resolve('src/shared'),
+        '@contracts': resolve('src/contracts')
       }
     }
   },
@@ -31,7 +33,9 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src'),
         '@components': resolve('src/renderer/src/components'),
         '@shared': resolve('src/shared'),
-        '@infra': resolve('src/renderer/src/infra')
+        '@infra': resolve('src/renderer/src/infra'),
+        '@contracts': resolve('src/contracts'),
+        '@sdk': resolve('src/sdk')
       }
     },
     plugins: [

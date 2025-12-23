@@ -1,4 +1,6 @@
-import type { IPCChannel, IPCParams, IPCResult } from '@shared/types/ipc'
+import type { IPCChannel, IPCData, IPCParams } from '@shared/types/ipc'
+import type { RPCResult } from '@contracts/rpc'
+import { SDKError } from '@sdk/core/error'
 
 type RequestInterceptor = <C extends IPCChannel>(
   channel: C,
@@ -8,6 +10,11 @@ type RequestInterceptor = <C extends IPCChannel>(
 type ResponseInterceptor = <T>(data: T) => T
 
 type ErrorHandler = (error: unknown) => void
+
+function unwrapOrThrow<T>(result: RPCResult<T>): T {
+  if (result.ok) return result.data
+  throw SDKError.fromRPCError(result.error)
+}
 
 /**
  * API 客户端
@@ -26,7 +33,7 @@ class APIClient {
    * @param params - 请求参数（可选，根据 channel 自动推导类型）
    * @returns Promise<IPCResult<C>> - 返回类型根据 channel 自动推导
    */
-  async invoke<C extends IPCChannel>(channel: C, params?: IPCParams<C>): Promise<IPCResult<C>> {
+  async invoke<C extends IPCChannel>(channel: C, params?: IPCParams<C>): Promise<IPCData<C>> {
     try {
       // 1. 请求拦截
       let processedChannel: C = channel
@@ -46,18 +53,21 @@ class APIClient {
 
       // 3. 调用 IPC
       const startTime = Date.now()
-      const result = await window.api.invoke(processedChannel, processedParams)
+      const rpcResult = (await window.api.invoke(
+        processedChannel,
+        processedParams
+      )) as unknown as RPCResult<IPCData<C>>
       const duration = Date.now() - startTime
 
       // 4. 记录响应日志
       if (isDev) {
-        console.log(`[API] ← ${processedChannel} (${duration}ms)`, result)
+        console.log(`[API] ← ${processedChannel} (${duration}ms)`, rpcResult)
       }
 
       // 5. 响应拦截
-      let processedResult = result
+      let processedResult: IPCData<C> = unwrapOrThrow(rpcResult)
       for (const interceptor of this.responseInterceptors) {
-        processedResult = interceptor(processedResult) as IPCResult<C>
+        processedResult = interceptor(processedResult) as IPCData<C>
       }
 
       return processedResult

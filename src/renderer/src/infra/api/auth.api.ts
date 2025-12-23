@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { typezClient } from '@infra/sdk'
 
 /**
  * 认证 API
@@ -13,7 +13,7 @@ export const authAPI = {
    * @returns Promise<User> - 用户信息（camelCase）
    */
   login: (username: string, password: string) => {
-    return apiClient.invoke('auth:login', { username, password })
+    return typezClient.auth.login(username, password)
   },
 
   /**
@@ -24,7 +24,7 @@ export const authAPI = {
    * @returns Promise<User> - 用户信息（camelCase）
    */
   register: (username: string, displayName: string, password: string) => {
-    return apiClient.invoke('auth:register', { username, displayName, password })
+    return typezClient.auth.register(username, displayName, password)
   },
 
   /**
@@ -33,7 +33,7 @@ export const authAPI = {
    * @returns Promise<void>
    */
   logout: (userId: string) => {
-    return apiClient.invoke('auth:logout', { userId })
+    return typezClient.auth.logout(userId)
   },
 
   /**
@@ -42,6 +42,6 @@ export const authAPI = {
    * @returns Promise<User | null> - 用户信息或 null（camelCase）
    */
   getCurrentUser: (userId: string) => {
-    return apiClient.invoke('auth:getCurrentUser', { userId })
+    return typezClient.auth.getCurrentUser(userId)
   }
 }

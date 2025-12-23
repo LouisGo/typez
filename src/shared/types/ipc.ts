@@ -3,6 +3,7 @@
 // ============================================
 
 import type { User, Chat, Message } from './models'
+import type { RPCResult } from '@contracts/rpc'
 
 /**
  * 定义主进程和渲染进程之间的 IPC 通信接口
@@ -14,22 +15,22 @@ import type { User, Chat, Message } from './models'
  */
 export interface IPCChannels {
   // Database operations
-  'db:query': { params: QueryParams; result: QueryResult }
-  'db:insert': { params: InsertParams; result: InsertResult }
-  'db:update': { params: UpdateParams; result: UpdateResult }
-  'db:delete': { params: DeleteParams; result: DeleteResult }
+  'db:query': { params: QueryParams; result: RPCResult<QueryResult> }
+  'db:insert': { params: InsertParams; result: RPCResult<InsertResult> }
+  'db:update': { params: UpdateParams; result: RPCResult<UpdateResult> }
+  'db:delete': { params: DeleteParams; result: RPCResult<DeleteResult> }
 
   // Auth operations
-  'auth:login': { params: LoginParams; result: User }
-  'auth:register': { params: RegisterParams; result: User }
-  'auth:logout': { params: LogoutParams; result: void }
-  'auth:getCurrentUser': { params: GetCurrentUserParams; result: User | null }
+  'auth:login': { params: LoginParams; result: RPCResult<User> }
+  'auth:register': { params: RegisterParams; result: RPCResult<User> }
+  'auth:logout': { params: LogoutParams; result: RPCResult<void> }
+  'auth:getCurrentUser': { params: GetCurrentUserParams; result: RPCResult<User | null> }
 
   // Chat operations
-  'chat:getChats': { params: void; result: Chat[] }
-  'chat:getChatById': { params: GetChatByIdParams; result: Chat | null }
-  'chat:getMessages': { params: GetMessagesParams; result: Message[] }
-  'chat:sendMessage': { params: SendMessageParams; result: Message }
+  'chat:getChats': { params: void; result: RPCResult<Chat[]> }
+  'chat:getChatById': { params: GetChatByIdParams; result: RPCResult<Chat | null> }
+  'chat:getMessages': { params: GetMessagesParams; result: RPCResult<Message[]> }
+  'chat:sendMessage': { params: SendMessageParams; result: RPCResult<Message> }
 }
 
 // ============================================
@@ -45,6 +46,12 @@ export type IPCParams<Channel extends keyof IPCChannels> = IPCChannels[Channel][
  * 提取 IPC Channel 的返回类型
  */
 export type IPCResult<Channel extends keyof IPCChannels> = IPCChannels[Channel]['result']
+
+/**
+ * 提取 IPC Channel 的数据载荷类型（即 RPCResult<T> 中的 T）
+ */
+export type IPCData<Channel extends keyof IPCChannels> =
+  IPCChannels[Channel]['result'] extends RPCResult<infer T> ? T : never
 
 /**
  * 提取所有 IPC Channel 名称的联合类型
