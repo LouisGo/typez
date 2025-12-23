@@ -12,11 +12,18 @@
     "baseUrl": ".",
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["src/renderer/src/*"],
-      "@renderer/*": ["src/renderer/src/*"],
-      "@components/*": ["src/renderer/src/components/*"],
-      "@shared/*": ["src/shared/*"],
-      "@infra/*": ["src/renderer/src/infra/*"]
+      "@/*": [
+        "src/renderer/src/*"
+      ],
+      "@renderer/*": [
+        "src/renderer/src/*"
+      ],
+      "@components/*": [
+        "src/renderer/src/components/*"
+      ],
+      "@infra/*": [
+        "src/renderer/src/infra/*"
+      ]
     }
   }
 }
