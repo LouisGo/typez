@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { UserTable } from '../../database/types'
-import type { UserStatus } from '@sdk/types/models'
+import type { UserStatus } from '@sdk/contract/models'
 
 /**
  * User Mock Data Generator

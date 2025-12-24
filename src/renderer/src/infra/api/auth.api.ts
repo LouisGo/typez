@@ -1,4 +1,5 @@
 import { typezClient } from '@infra/sdk'
+import type { UserId } from '@sdk/contract/models'
 
 /**
  * 认证 API
@@ -32,7 +33,7 @@ export const authAPI = {
    * @param userId - 用户 ID
    * @returns Promise<void>
    */
-  logout: (userId: string) => {
+  logout: (userId: UserId) => {
     return typezClient.auth.logout(userId)
   },
 

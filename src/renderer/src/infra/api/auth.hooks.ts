@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { authAPI } from './auth.api'
 import { useAuthStore } from '@renderer/stores'
 import type { LoginFormValues, RegisterFormValues } from './types'
-import type { User } from '@sdk/types/models'
+import type { User } from '@sdk/contract/models'
 
 /**
  * 登录 Mutation Hook

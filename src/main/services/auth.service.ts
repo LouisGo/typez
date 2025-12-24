@@ -1,7 +1,7 @@
 import { DatabaseService } from '../database'
 import type { IAuthService } from './auth.service.interface'
 import type { UserTable } from '../database/types'
-import type { User } from '@sdk/types/models'
+import type { User, UserId } from '@sdk/contract/models'
 import { createAuthError } from '@sdk/auth/errors'
 import { userTableToUser } from '../utils/transformers'
 
@@ -57,7 +57,7 @@ function validateDisplayName(displayName: string): void {
  * 负责数据转换：snake_case (数据库) → camelCase (领域模型)
  */
 export class AuthService implements IAuthService {
-  private currentUserId: string | null = null
+  private currentUserId: UserId | null = null
 
   constructor(private db: DatabaseService) {}
 
@@ -87,7 +87,7 @@ export class AuthService implements IAuthService {
       where: { id: userTable.id }
     })
 
-    this.currentUserId = userTable.id
+    this.currentUserId = userTable.id as UserId
     return userTableToUser(userTable)
   }
 
@@ -107,7 +107,7 @@ export class AuthService implements IAuthService {
     }
 
     const now = Date.now()
-    const userId = crypto.randomUUID()
+    const userId = crypto.randomUUID() as UserId
 
     this.db.insert({
       table: 'users',
@@ -127,11 +127,11 @@ export class AuthService implements IAuthService {
     })
 
     this.currentUserId = userId
-    const user = await this.getCurrentUser(userId)
+    const user = await this.getCurrentUser(userId as UserId)
     return user!
   }
 
-  async logout(userId: string): Promise<void> {
+  async logout(userId: UserId): Promise<void> {
     this.db.update({
       table: 'users',
       data: { status: 'offline', last_seen: Date.now() },
@@ -142,7 +142,7 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async getCurrentUser(userId?: string): Promise<User | null> {
+  async getCurrentUser(userId?: UserId): Promise<User | null> {
     const id = userId || this.currentUserId
     if (!id) return null
 

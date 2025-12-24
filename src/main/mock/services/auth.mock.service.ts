@@ -1,7 +1,7 @@
 import { DatabaseService } from '../../database'
 import type { IAuthService } from '../../services/auth.service.interface'
 import type { UserTable } from '../../database/types'
-import type { User } from '@sdk/types/models'
+import type { User, UserId } from '@sdk/contract/models'
 import { createAuthError } from '@sdk/auth/errors'
 import { userTableToUser } from '../../utils/transformers'
 
@@ -56,7 +56,7 @@ function validateDisplayName(displayName: string): void {
  * 数据存储在数据库中，便于后续迁移到真实服务
  */
 export class MockAuthService implements IAuthService {
-  private currentUserId: string | null = null
+  private currentUserId: UserId | null = null
 
   constructor(private db: DatabaseService) {
     // MVP 版本：不再自动创建测试用户，用户需要自己注册
@@ -89,7 +89,7 @@ export class MockAuthService implements IAuthService {
       where: { id: userTable.id }
     })
 
-    this.currentUserId = userTable.id
+    this.currentUserId = userTable.id as UserId
     return userTableToUser(userTable)
   }
 
@@ -129,12 +129,12 @@ export class MockAuthService implements IAuthService {
       }
     })
 
-    this.currentUserId = userId
-    const user = await this.getCurrentUser(userId)
+    this.currentUserId = userId as UserId
+    const user = await this.getCurrentUser(userId as UserId)
     return user!
   }
 
-  async logout(userId: string): Promise<void> {
+  async logout(userId: UserId): Promise<void> {
     await this.delay(300)
 
     this.db.update({
@@ -147,7 +147,7 @@ export class MockAuthService implements IAuthService {
     }
   }
 
-  async getCurrentUser(userId?: string): Promise<User | null> {
+  async getCurrentUser(userId?: UserId): Promise<User | null> {
     const id = userId || this.currentUserId
     if (!id) return null
 

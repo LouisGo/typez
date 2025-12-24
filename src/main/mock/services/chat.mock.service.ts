@@ -1,6 +1,6 @@
 import type { IChatService } from '../../services/chat.service.interface'
 import type { ChatTable, MessageTable } from '../../database/types'
-import type { Chat, Message } from '@sdk/types/models'
+import type { Chat, Message, ChatId } from '@sdk/contract/models'
 import { chatTableToChat, messageTableToMessage } from '../../utils/transformers'
 import { ChatGenerator, MessageGenerator } from '../generators'
 
@@ -31,30 +31,30 @@ export class MockChatService implements IChatService {
     return this.chats.map(chatTableToChat)
   }
 
-  async getChatById(id: string): Promise<Chat | null> {
+  async getChatById(id: ChatId): Promise<Chat | null> {
     await this.delay(200)
     const chat = this.chats.find((chat) => chat.id === id) || null
     return chat ? chatTableToChat(chat) : null
   }
 
-  async getMessages(chatId: string, limit: number = 50, offset: number = 0): Promise<Message[]> {
+  async getMessages(chatId: ChatId, limit: number = 50, offset: number = 0): Promise<Message[]> {
     await this.delay(300)
-    const chatMessages = this.messages.get(chatId) || []
+    const chatMessages = this.messages.get(chatId as string) || []
     return chatMessages.slice(offset, offset + limit).map(messageTableToMessage)
   }
 
-  async sendMessage(chatId: string, content: string): Promise<Message> {
+  async sendMessage(chatId: ChatId, content: string): Promise<Message> {
     await this.delay(200)
-    const newMessage = MessageGenerator.generateOne(chatId)
+    const newMessage = MessageGenerator.generateOne(chatId as string)
     newMessage.content = content
     newMessage.created_at = Date.now()
 
-    const chatMessages = this.messages.get(chatId) || []
+    const chatMessages = this.messages.get(chatId as string) || []
     chatMessages.unshift(newMessage) // 新消息放在开头（模拟倒序）
-    this.messages.set(chatId, chatMessages)
+    this.messages.set(chatId as string, chatMessages)
 
     // 更新最后一条消息
-    const chat = this.chats.find((c) => c.id === chatId)
+    const chat = this.chats.find((c) => c.id === (chatId as string))
     if (chat) {
       chat.last_message_id = newMessage.id
       chat.last_message_at = newMessage.created_at

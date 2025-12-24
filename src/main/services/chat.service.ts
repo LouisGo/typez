@@ -1,7 +1,7 @@
 import { DatabaseService } from '../database'
 import type { IChatService } from './chat.service.interface'
 import type { ChatTable, MessageTable } from '../database/types'
-import type { Chat, Message } from '@sdk/types/models'
+import type { Chat, Message, ChatId } from '@sdk/contract/models'
 import { chatTableToChat, messageTableToMessage } from '../utils/transformers'
 
 /**
@@ -19,10 +19,10 @@ export class ChatService implements IChatService {
     return chatTables.map(chatTableToChat)
   }
 
-  async getChatById(id: string): Promise<Chat | null> {
+  async getChatById(id: ChatId): Promise<Chat | null> {
     const result = await this.db.query({
       table: 'chats',
-      where: { id }
+      where: { id: id as string }
     })
     if (result.rows.length === 0) {
       return null
@@ -32,17 +32,17 @@ export class ChatService implements IChatService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getMessages(chatId: string, _limit: number = 50, _offset: number = 0): Promise<Message[]> {
+  async getMessages(chatId: ChatId, _limit: number = 50, _offset: number = 0): Promise<Message[]> {
     const result = await this.db.query({
       table: 'messages',
-      where: { chat_id: chatId }
+      where: { chat_id: chatId as string }
       // TODO: 支持 limit, offset 和排序
     })
     const messageTables = result.rows as MessageTable[]
     return messageTables.map(messageTableToMessage)
   }
 
-  async sendMessage(chatId: string, content: string): Promise<Message> {
+  async sendMessage(chatId: ChatId, content: string): Promise<Message> {
     const now = Date.now()
     const messageId = crypto.randomUUID()
 

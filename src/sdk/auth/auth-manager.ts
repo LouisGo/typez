@@ -1,4 +1,4 @@
-import type { User } from '../types/models'
+import type { User } from '../contract/models'
 import type { StorageAdapter } from './storage'
 
 export type AuthSession = {

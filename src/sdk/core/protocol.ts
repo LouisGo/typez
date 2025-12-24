@@ -1,15 +1,15 @@
 /**
- * 跨边界 RPC 协议：统一的可序列化 Result Envelope
+ * 跨边界 Protocol 协议：统一的可序列化 Result Envelope
  * - 传输层永远返回 ok/data 或 ok:false/error
  * - SDK 对外仍以 throw/reject 语义暴露
  */
 
-export type RPCOk<T> = {
+export type ProtocolOk<T> = {
   ok: true
   data: T
 }
 
-export type RPCError = {
+export type ProtocolError = {
   /**
    * 稳定错误码（业务/系统）
    * 规范：<DOMAIN>/<CODE>
@@ -23,17 +23,17 @@ export type RPCError = {
   /** 追踪信息（可选） */
   traceId?: string
   /** 嵌套 cause（可选） */
-  cause?: RPCError
+  cause?: ProtocolError
 }
 
-export type RPCErr = {
+export type ProtocolErr = {
   ok: false
-  error: RPCError
+  error: ProtocolError
 }
 
-export type RPCResult<T> = RPCOk<T> | RPCErr
+export type ProtocolResult<T> = ProtocolOk<T> | ProtocolErr
 
-export function isRPCResult(value: unknown): value is RPCResult<unknown> {
+export function isProtocolResult(value: unknown): value is ProtocolResult<unknown> {
   if (!value || typeof value !== 'object') return false
   const v = value as Record<string, unknown>
   return 'ok' in v && v.ok === true ? 'data' in v : v.ok === false && 'error' in v

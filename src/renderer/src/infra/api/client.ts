@@ -1,19 +1,19 @@
-import type { IPCChannel, IPCData, IPCParams } from '@sdk/types/ipc'
-import type { RPCResult } from '@sdk/core/rpc'
+import type { APIChannel, ContractData, ContractParams } from '@sdk/contract'
+import type { ProtocolResult } from '@sdk/core/protocol'
 import { SDKError } from '@sdk/core/error'
 
-type RequestInterceptor = <C extends IPCChannel>(
+type RequestInterceptor = <C extends APIChannel>(
   channel: C,
-  params: IPCParams<C>
-) => { channel: C; params: IPCParams<C> }
+  params: ContractParams<C>
+) => { channel: C; params: ContractParams<C> }
 
 type ResponseInterceptor = <T>(data: T) => T
 
 type ErrorHandler = (error: unknown) => void
 
-function unwrapOrThrow<T>(result: RPCResult<T>): T {
+function unwrapOrThrow<T>(result: ProtocolResult<T>): T {
   if (result.ok) return result.data
-  throw SDKError.fromRPCError(result.error)
+  throw SDKError.fromProtocolError(result.error)
 }
 
 /**
@@ -31,16 +31,19 @@ class APIClient {
    * @template C - IPC Channel 名称
    * @param channel - IPC Channel 名称
    * @param params - 请求参数（可选，根据 channel 自动推导类型）
-   * @returns Promise<IPCResult<C>> - 返回类型根据 channel 自动推导
+   * @returns Promise<ProtocolResult<C>> - 返回类型根据 channel 自动推导
    */
-  async invoke<C extends IPCChannel>(channel: C, params?: IPCParams<C>): Promise<IPCData<C>> {
+  async invoke<C extends APIChannel>(
+    channel: C,
+    params?: ContractParams<C>
+  ): Promise<ContractData<C>> {
     try {
       // 1. 请求拦截
       let processedChannel: C = channel
-      let processedParams: IPCParams<C> | undefined = params
+      let processedParams: ContractParams<C> | undefined = params
 
       for (const interceptor of this.requestInterceptors) {
-        const result = interceptor(processedChannel, processedParams as IPCParams<C>)
+        const result = interceptor(processedChannel, processedParams as ContractParams<C>)
         processedChannel = result.channel
         processedParams = result.params
       }
@@ -56,7 +59,7 @@ class APIClient {
       const rpcResult = (await window.api.invoke(
         processedChannel,
         processedParams
-      )) as unknown as RPCResult<IPCData<C>>
+      )) as unknown as ProtocolResult<ContractData<C>>
       const duration = Date.now() - startTime
 
       // 4. 记录响应日志
@@ -65,9 +68,9 @@ class APIClient {
       }
 
       // 5. 响应拦截
-      let processedResult: IPCData<C> = unwrapOrThrow(rpcResult)
+      let processedResult: ContractData<C> = unwrapOrThrow(rpcResult)
       for (const interceptor of this.responseInterceptors) {
-        processedResult = interceptor(processedResult) as IPCData<C>
+        processedResult = interceptor(processedResult) as ContractData<C>
       }
 
       return processedResult

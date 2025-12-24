@@ -1,4 +1,5 @@
 import { typezClient } from '@infra/sdk'
+import type { ChatId } from '@sdk/contract/models'
 
 /**
  * 聊天 API
@@ -19,7 +20,7 @@ export const chatAPI = {
    * @param chatId - 聊天 ID
    * @returns Promise<Chat | null> - 聊天信息或 null（camelCase）
    */
-  getChatById: (chatId: string) => {
+  getChatById: (chatId: ChatId) => {
     return typezClient.chat.getConversationById(chatId)
   },
 
@@ -30,7 +31,7 @@ export const chatAPI = {
    * @param offset - 偏移量（可选）
    * @returns Promise<Message[]> - 消息列表（camelCase）
    */
-  getMessages: (chatId: string, limit?: number, offset?: number) => {
+  getMessages: (chatId: ChatId, limit?: number, offset?: number) => {
     return typezClient.chat.getMessages(chatId, limit, offset)
   },
 
@@ -40,7 +41,7 @@ export const chatAPI = {
    * @param content - 消息内容
    * @returns Promise<Message> - 创建的消息（camelCase）
    */
-  sendMessage: (chatId: string, content: string) => {
+  sendMessage: (chatId: ChatId, content: string) => {
     return typezClient.chat.sendMessage(chatId, content)
   }
 }

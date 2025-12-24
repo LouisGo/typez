@@ -7,7 +7,7 @@
  * 与 SQLite 数据库表结构一一对应
  */
 
-import type { UserStatus, ChatType, MessageType, MemberRole, MediaType } from '@sdk/types/models'
+import type { UserStatus, ChatType, MessageType, MemberRole, MediaType } from '@sdk/contract/models'
 
 export interface UserTable {
   id: string

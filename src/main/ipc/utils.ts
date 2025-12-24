@@ -1,8 +1,7 @@
-import { ipcMain } from 'electron'
-import type { IPCChannel, IPCData, IPCParams, IPCResult } from '@sdk/types/ipc'
+import type { APIChannel, ContractData, ContractParams, ContractResult } from '@sdk/contract'
 import { AuthError } from '@sdk/auth/errors'
-import type { RPCError, RPCResult } from '@sdk/core/rpc'
-import { CommonErrorCode, ErrorDomain, makeErrorCode } from '@sdk/core/rpc'
+import type { ProtocolError, ProtocolResult } from '@sdk/core/protocol'
+import { CommonErrorCode, ErrorDomain, makeErrorCode } from '@sdk/core/protocol'
 
 type Awaitable<T> = T | Promise<T>
 
@@ -17,7 +16,7 @@ function normalizeDomainCode(input: {
   return makeErrorCode(input.domain, input.code)
 }
 
-function tryMapSqliteError(error: Error): RPCError | null {
+function tryMapSqliteError(error: Error): ProtocolError | null {
   const sqliteErr = error as unknown as Record<string, unknown>
   const rawCode: unknown = sqliteErr?.code
   const message = error.message || '数据库错误'
@@ -51,7 +50,7 @@ function tryMapSqliteError(error: Error): RPCError | null {
   return null
 }
 
-function serializeError(error: unknown): RPCError {
+function serializeError(error: unknown): ProtocolError {
   if (error instanceof AuthError) {
     return {
       code: normalizeDomainCode({ domain: ErrorDomain.AUTH, code: String(error.code) }),
@@ -94,28 +93,30 @@ function serializeError(error: unknown): RPCError {
   }
 }
 
+import { ipcMain } from 'electron'
+
 /**
  * 类型安全的 IPC Handler 创建函数
- * 确保 handler 的参数和返回值类型与 IPCChannels 定义一致
+ * 确保 handler 的参数和返回值类型与 APIContract 定义一致
  *
- * @template C - IPC Channel 名称
- * @param channel - IPC Channel 名称
+ * @template C - API Channel 名称
+ * @param channel - API Channel 名称
  * @param handler - 处理函数，接收 params 并返回 Promise<result>
  */
-export function createHandler<C extends IPCChannel>(
+export function createHandler<C extends APIChannel>(
   channel: C,
-  handler: (params: IPCParams<C>) => Awaitable<IPCData<C>>
+  handler: (params: ContractParams<C>) => Awaitable<ContractData<C>>
 ): void {
-  ipcMain.handle(channel, async (_, params: IPCParams<C>) => {
+  ipcMain.handle(channel, async (_, params: ContractParams<C>) => {
     try {
       console.log(`[IPC] ${channel}`, params)
       const data = await handler(params)
-      const result: RPCResult<IPCData<C>> = { ok: true, data }
-      return result as IPCResult<C>
+      const result: ProtocolResult<ContractData<C>> = { ok: true, data }
+      return result as ContractResult<C>
     } catch (error) {
       console.error(`[IPC] ${channel} error:`, error)
-      const result: RPCResult<IPCData<C>> = { ok: false, error: serializeError(error) }
-      return result as IPCResult<C>
+      const result: ProtocolResult<ContractData<C>> = { ok: false, error: serializeError(error) }
+      return result as ContractResult<C>
     }
   })
 }

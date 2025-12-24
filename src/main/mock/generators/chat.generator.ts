@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { ChatTable } from '../../database/types'
-import type { ChatType } from '@sdk/types/models'
+import type { ChatType } from '@sdk/contract/models'
 
 /**
  * Chat Mock Data Generator

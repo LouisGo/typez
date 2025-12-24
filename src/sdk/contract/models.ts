@@ -1,24 +1,32 @@
+import type { Id } from '../core/branded'
+
 // ============================================
-// Domain Models (camelCase)
+// Branded ID Types
 // ============================================
 
-/**
- * 领域模型类型定义
- * 用于 IPC 通信，采用 camelCase 命名
- * 这些类型由 Main 进程返回给 Renderer 进程
- */
+export type UserId = Id<'user'>
+export type ChatId = Id<'chat'>
+export type MessageId = Id<'message'>
+
+// ============================================
+// Enums & Literals
+// ============================================
 
 export type UserStatus = 'online' | 'offline' | 'away' | 'busy'
 export type ChatType = 'private' | 'group' | 'channel'
 export type MessageType = 'text' | 'image' | 'video' | 'file' | 'audio' | 'voice'
 export type MemberRole = 'owner' | 'admin' | 'member'
-export type MediaType = 'image' | 'video' | 'file' | 'audio'
+export type MediaType = 'image' | 'video' | 'audio' | 'file' | 'voice'
+
+// ============================================
+// Domain Models
+// ============================================
 
 /**
  * 用户模型
  */
 export interface User {
-  id: string
+  id: UserId
   username: string
   displayName: string
   avatarUrl: string | null
@@ -34,13 +42,13 @@ export interface User {
  * 聊天模型
  */
 export interface Chat {
-  id: string
+  id: ChatId
   type: ChatType
   title: string | null
   avatarUrl: string | null
   description: string | null
   memberCount: number
-  lastMessageId: string | null
+  lastMessageId: MessageId | null
   lastMessageAt: number | null
   pinned: boolean
   muted: boolean
@@ -52,15 +60,29 @@ export interface Chat {
  * 消息模型
  */
 export interface Message {
-  id: string
-  chatId: string
-  senderId: string
+  id: MessageId
+  chatId: ChatId
+  senderId: UserId
   content: string
   type: MessageType
-  replyToId: string | null
-  forwardedFromId: string | null
+  replyToId: MessageId | null
+  forwardedFromId: MessageId | null
   edited: boolean
   read: boolean
   createdAt: number
   updatedAt: number
+}
+
+// ============================================
+// Utilities
+// ============================================
+
+export interface PageCursor {
+  offset: number
+  limit: number
+}
+
+export interface Page<T> {
+  items: T[]
+  next?: PageCursor
 }

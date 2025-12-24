@@ -1,7 +1,8 @@
 import type { Transport } from '@sdk/core/transport'
 import { invokeOrThrow } from '@sdk/core/invoke'
 import type { AuthManager } from '@sdk/auth/auth-manager'
-import type { User } from './types/models'
+import type { User, UserId, ChatId } from './contract/models'
+import type { APIChannel, ContractParams } from './contract'
 
 export type TypezClient = ReturnType<typeof createTypezClient>
 
@@ -12,10 +13,8 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
     /**
      * 仅用于内部/高级场景的通用调用入口（不建议业务日常使用）
      */
-    invoke: <C extends import('./types/ipc').IPCChannel>(
-      channel: C,
-      params?: import('./types/ipc').IPCParams<C>
-    ) => invokeOrThrow(transport, channel, params),
+    invoke: <C extends APIChannel>(channel: C, params?: ContractParams<C>) =>
+      invokeOrThrow(transport, channel, params),
 
     /**
      * 事件监听
@@ -38,7 +37,7 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
         if (auth) await auth.setSession({ user })
         return user
       },
-      logout: async (userId: string) => {
+      logout: async (userId: UserId) => {
         await invokeOrThrow(transport, 'auth:logout', { userId })
         if (auth) await auth.setSession(null)
       },
@@ -54,11 +53,11 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
 
     chat: {
       getConversations: () => invokeOrThrow(transport, 'chat:getConversations'),
-      getConversationById: (chatId: string) =>
+      getConversationById: (chatId: ChatId) =>
         invokeOrThrow(transport, 'chat:getConversationById', { chatId }),
-      getMessages: (chatId: string, limit?: number, offset?: number) =>
+      getMessages: (chatId: ChatId, limit?: number, offset?: number) =>
         invokeOrThrow(transport, 'chat:getMessages', { chatId, limit, offset }),
-      sendMessage: (chatId: string, content: string) =>
+      sendMessage: (chatId: ChatId, content: string) =>
         invokeOrThrow(transport, 'chat:sendMessage', { chatId, content })
     }
   }

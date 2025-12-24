@@ -1,5 +1,5 @@
-import type { RPCError } from './rpc'
-import { CommonErrorCode } from './rpc'
+import type { ProtocolError } from './protocol'
+import { CommonErrorCode } from './protocol'
 
 export class SDKError extends Error {
   readonly code: string
@@ -22,13 +22,13 @@ export class SDKError extends Error {
     this.cause = input.cause
   }
 
-  static fromRPCError(err: RPCError): SDKError {
+  static fromProtocolError(err: ProtocolError): SDKError {
     return new SDKError({
       code: err.code,
       message: err.message,
       details: err.details,
       traceId: err.traceId,
-      cause: err.cause ? SDKError.fromRPCError(err.cause) : undefined
+      cause: err.cause ? SDKError.fromProtocolError(err.cause) : undefined
     })
   }
 

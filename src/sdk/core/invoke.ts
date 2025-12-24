@@ -1,20 +1,20 @@
-import type { IPCChannel, IPCData, IPCParams } from '../types/ipc'
-import type { RPCResult } from './rpc'
+import type { APIChannel, ContractData, ContractParams } from '../contract'
+import type { ProtocolResult } from './protocol'
 import { SDKError } from '@sdk/core/error'
 import type { Transport } from '@sdk/core/transport'
 
-export async function invokeOrThrow<C extends IPCChannel>(
+export async function invokeOrThrow<C extends APIChannel>(
   transport: Transport,
   channel: C,
-  params?: IPCParams<C>
-): Promise<IPCData<C>> {
-  let result: RPCResult<IPCData<C>>
+  params?: ContractParams<C>
+): Promise<ContractData<C>> {
+  let result: ProtocolResult<ContractData<C>>
   try {
-    result = (await transport.request(channel, params)) as RPCResult<IPCData<C>>
+    result = (await transport.request(channel, params)) as ProtocolResult<ContractData<C>>
   } catch (e) {
     throw SDKError.transportError('Transport 调用失败', e)
   }
 
   if (result.ok) return result.data
-  throw SDKError.fromRPCError(result.error)
+  throw SDKError.fromProtocolError(result.error)
 }

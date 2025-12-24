@@ -1,4 +1,4 @@
-import type { User } from '@sdk/types/models'
+import type { User, UserId } from '@sdk/contract/models'
 
 /**
  * 认证服务接口
@@ -7,6 +7,6 @@ import type { User } from '@sdk/types/models'
 export interface IAuthService {
   login(username: string, password: string): Promise<User>
   register(username: string, displayName: string, password: string): Promise<User>
-  logout(userId: string): Promise<void>
-  getCurrentUser(userId?: string): Promise<User | null>
+  logout(userId: UserId): Promise<void>
+  getCurrentUser(userId?: UserId): Promise<User | null>
 }

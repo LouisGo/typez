@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authAPI } from '@infra/api'
-import type { User } from '@sdk/types/models'
+import type { User } from '@sdk/contract/models'
 
 /**
  * 认证状态管理
