@@ -5,7 +5,6 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/shared/**/*",
-    "src/contracts/**/*",
     "src/sdk/**/*"
   ],
   "compilerOptions": {
@@ -29,10 +28,10 @@
         "src/shared/*"
       ],
       "@contracts/*": [
-        "src/contracts/*"
+        "src/sdk/core/*"
       ],
       "@contracts": [
-        "src/contracts/index.ts"
+        "src/sdk/core/rpc.ts"
       ],
       "@sdk": [
         "src/sdk/index.ts"

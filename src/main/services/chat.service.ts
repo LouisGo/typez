@@ -1,7 +1,7 @@
 import { DatabaseService } from '../database'
 import type { IChatService } from './chat.service.interface'
-import type { ChatTable, MessageTable } from '@shared/types/database'
-import type { Chat, Message } from '@shared/types/models'
+import type { ChatTable, MessageTable } from '../database/types'
+import type { Chat, Message } from '@sdk/types/models'
 import { chatTableToChat, messageTableToMessage } from '../utils/transformers'
 
 /**
@@ -32,7 +32,7 @@ export class ChatService implements IChatService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getMessages(chatId: string, limit: number = 50, offset: number = 0): Promise<Message[]> {
+  async getMessages(chatId: string, _limit: number = 50, _offset: number = 0): Promise<Message[]> {
     const result = await this.db.query({
       table: 'messages',
       where: { chat_id: chatId }

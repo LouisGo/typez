@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authAPI } from '@infra/api'
-import type { User } from '@shared/types/models'
+import type { User } from '@sdk/types/models'
 
 /**
  * 认证状态管理
@@ -91,7 +91,7 @@ export const useAuthStore = create<AuthState>()(
         if (user?.id) {
           try {
             // 验证用户是否仍然有效
-            const currentUser = await authAPI.getCurrentUser(user.id)
+            const currentUser = await authAPI.getCurrentUser()
             if (currentUser) {
               set({ user: currentUser, isAuthenticated: true, isInitialized: true })
             } else {

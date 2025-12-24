@@ -1,8 +1,8 @@
 import { DatabaseService } from '../../database'
 import type { IAuthService } from '../../services/auth.service.interface'
-import type { UserTable } from '@shared/types/database'
-import type { User } from '@shared/types/models'
-import { createAuthError } from '@shared/types/auth-errors'
+import type { UserTable } from '../../database/types'
+import type { User } from '@sdk/types/models'
+import { createAuthError } from '@sdk/auth/errors'
 import { userTableToUser } from '../../utils/transformers'
 
 /**
@@ -56,19 +56,18 @@ function validateDisplayName(displayName: string): void {
  * 数据存储在数据库中，便于后续迁移到真实服务
  */
 export class MockAuthService implements IAuthService {
+  private currentUserId: string | null = null
+
   constructor(private db: DatabaseService) {
     // MVP 版本：不再自动创建测试用户，用户需要自己注册
   }
 
   async login(username: string, password: string): Promise<User> {
-    // 模拟网络延迟
     await this.delay(500)
-
-    // 输入验证
+    // ... (验证逻辑保持不变)
     validateUsername(username)
     validatePassword(password)
 
-    // 查询数据库
     const result = this.db.query({
       table: 'users',
       where: { username }
@@ -80,37 +79,27 @@ export class MockAuthService implements IAuthService {
 
     const userTable = result.rows[0] as UserTable
 
-    // 密码校验（明文比较，开发阶段）
     if (userTable.password !== password) {
       throw createAuthError.invalidPassword()
     }
 
-    // 更新登录状态
     this.db.update({
       table: 'users',
       data: { status: 'online', last_seen: Date.now() },
       where: { id: userTable.id }
     })
 
-    // 重新查询以获取最新状态
-    const updatedResult = this.db.query({
-      table: 'users',
-      where: { id: userTable.id }
-    })
-
-    const updatedUserTable = updatedResult.rows[0] as UserTable
-    return userTableToUser(updatedUserTable)
+    this.currentUserId = userTable.id
+    return userTableToUser(userTable)
   }
 
   async register(username: string, displayName: string, password: string): Promise<User> {
     await this.delay(500)
-
-    // 输入验证
+    // ... (逻辑保持不变)
     validateUsername(username)
     validatePassword(password)
     validateDisplayName(displayName)
 
-    // 检查用户名是否已存在
     const existingResult = this.db.query({
       table: 'users',
       where: { username }
@@ -120,41 +109,29 @@ export class MockAuthService implements IAuthService {
       throw createAuthError.usernameAlreadyExists()
     }
 
-    // 创建新用户
     const now = Date.now()
     const userId = crypto.randomUUID()
 
-    try {
-      this.db.insert({
-        table: 'users',
-        data: {
-          id: userId,
-          username: username.trim(),
-          display_name: displayName.trim(),
-          password, // 明文存储，便于开发调试
-          avatar_url: '',
-          phone: '',
-          bio: '',
-          status: 'online',
-          last_seen: now,
-          created_at: now,
-          updated_at: now
-        }
-      })
-    } catch (error) {
-      // 处理唯一性约束错误
-      if (error instanceof Error && error.message.includes('UNIQUE constraint')) {
-        throw createAuthError.usernameAlreadyExists()
+    this.db.insert({
+      table: 'users',
+      data: {
+        id: userId,
+        username: username.trim(),
+        display_name: displayName.trim(),
+        password,
+        avatar_url: '',
+        phone: '',
+        bio: '',
+        status: 'online',
+        last_seen: now,
+        created_at: now,
+        updated_at: now
       }
-      throw createAuthError.unknown('创建用户失败')
-    }
+    })
 
+    this.currentUserId = userId
     const user = await this.getCurrentUser(userId)
-    if (!user) {
-      throw createAuthError.unknown('创建用户失败')
-    }
-
-    return user
+    return user!
   }
 
   async logout(userId: string): Promise<void> {
@@ -165,12 +142,18 @@ export class MockAuthService implements IAuthService {
       data: { status: 'offline', last_seen: Date.now() },
       where: { id: userId }
     })
+    if (this.currentUserId === userId) {
+      this.currentUserId = null
+    }
   }
 
-  async getCurrentUser(userId: string): Promise<User | null> {
+  async getCurrentUser(userId?: string): Promise<User | null> {
+    const id = userId || this.currentUserId
+    if (!id) return null
+
     const result = this.db.query({
       table: 'users',
-      where: { id: userId }
+      where: { id }
     })
 
     if (result.rows.length === 0) {

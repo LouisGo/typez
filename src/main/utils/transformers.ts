@@ -3,8 +3,8 @@
  * 将数据库表格式（snake_case）转换为领域模型格式（camelCase）
  */
 
-import type { UserTable, ChatTable, MessageTable } from '@shared/types/database'
-import type { User, Chat, Message } from '@shared/types/models'
+import type { UserTable, ChatTable, MessageTable } from '../database/types'
+import type { User, Chat, Message } from '@sdk/types/models'
 
 /**
  * 将 UserTable 转换为 User

@@ -7,6 +7,8 @@
  * 与 SQLite 数据库表结构一一对应
  */
 
+import type { UserStatus, ChatType, MessageType, MemberRole, MediaType } from '@sdk/types/models'
+
 export interface UserTable {
   id: string
   username: string
@@ -83,17 +85,3 @@ export interface MediaTable {
   duration: number | null
   created_at: number
 }
-
-// ============================================
-// Enums
-// ============================================
-
-export type UserStatus = 'online' | 'offline' | 'away' | 'busy'
-
-export type ChatType = 'private' | 'group' | 'channel'
-
-export type MessageType = 'text' | 'image' | 'video' | 'file' | 'audio' | 'voice'
-
-export type MemberRole = 'owner' | 'admin' | 'member'
-
-export type MediaType = 'image' | 'video' | 'file' | 'audio'

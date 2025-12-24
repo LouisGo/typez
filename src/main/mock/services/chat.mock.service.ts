@@ -1,6 +1,6 @@
 import type { IChatService } from '../../services/chat.service.interface'
-import type { ChatTable, MessageTable } from '@shared/types/database'
-import type { Chat, Message } from '@shared/types/models'
+import type { ChatTable, MessageTable } from '../../database/types'
+import type { Chat, Message } from '@sdk/types/models'
 import { chatTableToChat, messageTableToMessage } from '../../utils/transformers'
 import { ChatGenerator, MessageGenerator } from '../generators'
 

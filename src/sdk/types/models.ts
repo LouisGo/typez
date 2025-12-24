@@ -8,7 +8,11 @@
  * 这些类型由 Main 进程返回给 Renderer 进程
  */
 
-import type { UserStatus, ChatType, MessageType } from './database'
+export type UserStatus = 'online' | 'offline' | 'away' | 'busy'
+export type ChatType = 'private' | 'group' | 'channel'
+export type MessageType = 'text' | 'image' | 'video' | 'file' | 'audio' | 'voice'
+export type MemberRole = 'owner' | 'admin' | 'member'
+export type MediaType = 'image' | 'video' | 'file' | 'audio'
 
 /**
  * 用户模型

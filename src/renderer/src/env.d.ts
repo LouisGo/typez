@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { IPCChannel, IPCParams, IPCResult } from '@shared/types/ipc'
+import type { IPCChannel, IPCParams, IPCResult } from '@sdk/types/ipc'
 
 declare global {
   interface Window {

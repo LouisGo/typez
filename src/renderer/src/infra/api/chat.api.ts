@@ -11,7 +11,7 @@ export const chatAPI = {
    * @returns Promise<Chat[]> - 聊天列表（camelCase）
    */
   getChats: () => {
-    return typezClient.chat.list()
+    return typezClient.chat.getConversations()
   },
 
   /**
@@ -20,7 +20,7 @@ export const chatAPI = {
    * @returns Promise<Chat | null> - 聊天信息或 null（camelCase）
    */
   getChatById: (chatId: string) => {
-    return typezClient.chat.byId(chatId)
+    return typezClient.chat.getConversationById(chatId)
   },
 
   /**
@@ -31,7 +31,7 @@ export const chatAPI = {
    * @returns Promise<Message[]> - 消息列表（camelCase）
    */
   getMessages: (chatId: string, limit?: number, offset?: number) => {
-    return typezClient.chat.messages(chatId, limit, offset)
+    return typezClient.chat.getMessages(chatId, limit, offset)
   },
 
   /**
@@ -41,6 +41,6 @@ export const chatAPI = {
    * @returns Promise<Message> - 创建的消息（camelCase）
    */
   sendMessage: (chatId: string, content: string) => {
-    return typezClient.chat.send(chatId, content)
+    return typezClient.chat.sendMessage(chatId, content)
   }
 }

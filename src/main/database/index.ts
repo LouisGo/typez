@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'path'
-import type { QueryParams, QueryResult, InsertParams, InsertResult } from '@shared/types/ipc'
+import type { QueryParams, QueryResult, InsertParams, InsertResult } from '@sdk/types/ipc'
 
 /**
  * Initial database schema SQL

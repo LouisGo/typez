@@ -1,5 +1,5 @@
-import type { RPCError } from '@contracts/rpc'
-import { CommonErrorCode } from '@contracts/rpc'
+import type { RPCError } from './rpc'
+import { CommonErrorCode } from './rpc'
 
 export class SDKError extends Error {
   readonly code: string

@@ -22,7 +22,7 @@ export function setupAuthHandlers(): void {
   })
 
   // 获取当前用户
-  createHandler('auth:getCurrentUser', async (params) => {
-    return await authService.getCurrentUser(params.userId)
+  createHandler('auth:me', async () => {
+    return await authService.getCurrentUser()
   })
 }

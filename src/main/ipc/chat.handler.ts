@@ -6,12 +6,12 @@ import { createHandler } from './utils'
  */
 export function setupChatHandlers(): void {
   // 获取聊天列表
-  createHandler('chat:getChats', async () => {
+  createHandler('chat:getConversations', async () => {
     return await chatService.getChats()
   })
 
   // 获取单个聊天
-  createHandler('chat:getChatById', async (params) => {
+  createHandler('chat:getConversationById', async (params) => {
     return await chatService.getChatById(params.chatId)
   })
 

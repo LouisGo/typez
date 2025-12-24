@@ -5,19 +5,33 @@
     "src/main/**/*",
     "src/preload/**/*",
     "src/shared/**/*",
-    "src/contracts/**/*"
+    "src/sdk/**/*"
   ],
   "compilerOptions": {
     "composite": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["src/shared/*"],
-      "@main/*": ["src/main/*"],
-      "@contracts/*": ["src/contracts/*"],
-      "@contracts": ["src/contracts/index.ts"],
-      "@sdk": ["src/sdk/index.ts"],
-      "@sdk/*": ["src/sdk/*"]
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@main/*": [
+        "src/main/*"
+      ],
+      "@contracts/*": [
+        "src/sdk/core/*"
+      ],
+      "@contracts": [
+        "src/sdk/core/rpc.ts"
+      ],
+      "@sdk": [
+        "src/sdk/index.ts"
+      ],
+      "@sdk/*": [
+        "src/sdk/*"
+      ]
     }
   }
 }

@@ -1,7 +1,7 @@
 import type { Transport } from '@sdk/core/transport'
 import { invokeOrThrow } from '@sdk/core/invoke'
 import type { AuthManager } from '@sdk/auth/auth-manager'
-import type { User } from '@shared/types/models'
+import type { User } from './types/models'
 
 export type TypezClient = ReturnType<typeof createTypezClient>
 
@@ -12,10 +12,16 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
     /**
      * 仅用于内部/高级场景的通用调用入口（不建议业务日常使用）
      */
-    invoke: <C extends import('@shared/types/ipc').IPCChannel>(
+    invoke: <C extends import('./types/ipc').IPCChannel>(
       channel: C,
-      params?: import('@shared/types/ipc').IPCParams<C>
+      params?: import('./types/ipc').IPCParams<C>
     ) => invokeOrThrow(transport, channel, params),
+
+    /**
+     * 事件监听
+     */
+    on: transport.on.bind(transport),
+    off: transport.off.bind(transport),
 
     auth: {
       login: async (username: string, password: string) => {
@@ -36,9 +42,8 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
         await invokeOrThrow(transport, 'auth:logout', { userId })
         if (auth) await auth.setSession(null)
       },
-      getCurrentUser: async (userId: string) => {
-        const user = await invokeOrThrow(transport, 'auth:getCurrentUser', { userId })
-        // 不强制写 session：交给上层决定是否用返回值覆盖
+      me: async () => {
+        const user = await invokeOrThrow(transport, 'auth:me')
         return user
       },
       /**
@@ -48,11 +53,12 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
     },
 
     chat: {
-      list: () => invokeOrThrow(transport, 'chat:getChats'),
-      byId: (chatId: string) => invokeOrThrow(transport, 'chat:getChatById', { chatId }),
-      messages: (chatId: string, limit?: number, offset?: number) =>
+      getConversations: () => invokeOrThrow(transport, 'chat:getConversations'),
+      getConversationById: (chatId: string) =>
+        invokeOrThrow(transport, 'chat:getConversationById', { chatId }),
+      getMessages: (chatId: string, limit?: number, offset?: number) =>
         invokeOrThrow(transport, 'chat:getMessages', { chatId, limit, offset }),
-      send: (chatId: string, content: string) =>
+      sendMessage: (chatId: string, content: string) =>
         invokeOrThrow(transport, 'chat:sendMessage', { chatId, content })
     }
   }

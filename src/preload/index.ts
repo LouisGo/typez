@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { IPCChannel, IPCParams, IPCResult } from '@shared/types/ipc'
+import type { IPCChannel, IPCParams, IPCResult } from '@sdk/types/ipc'
 
 /**
  * 类型安全的 IPC 调用函数
@@ -20,6 +20,20 @@ const api = {
    */
   invoke,
 
+  /**
+   * 订阅服务端推送事件
+   */
+  on: (channel: string, listener: (event: any, ...args: any[]) => void) => {
+    ipcRenderer.on(channel, listener)
+  },
+
+  /**
+   * 取消订阅
+   */
+  off: (channel: string, listener: (event: any, ...args: any[]) => void) => {
+    ipcRenderer.removeListener(channel, listener)
+  },
+
   // Database operations (保留兼容性，后续可迁移)
   db: {
     query: (params: IPCParams<'db:query'>) => invoke('db:query', params),
@@ -32,13 +46,13 @@ const api = {
     login: (params: IPCParams<'auth:login'>) => invoke('auth:login', params),
     register: (params: IPCParams<'auth:register'>) => invoke('auth:register', params),
     logout: (params: IPCParams<'auth:logout'>) => invoke('auth:logout', params),
-    getCurrentUser: (params: IPCParams<'auth:getCurrentUser'>) =>
-      invoke('auth:getCurrentUser', params)
+    me: () => invoke('auth:me')
   },
   // Chat operations
   chat: {
-    getChats: () => invoke('chat:getChats'),
-    getChatById: (params: IPCParams<'chat:getChatById'>) => invoke('chat:getChatById', params),
+    getConversations: () => invoke('chat:getConversations'),
+    getConversationById: (params: IPCParams<'chat:getConversationById'>) =>
+      invoke('chat:getConversationById', params),
     getMessages: (params: IPCParams<'chat:getMessages'>) => invoke('chat:getMessages', params),
     sendMessage: (params: IPCParams<'chat:sendMessage'>) => invoke('chat:sendMessage', params)
   }

@@ -1,5 +1,5 @@
-import type { IPCChannel, IPCData, IPCParams } from '@shared/types/ipc'
-import type { RPCResult } from '@contracts/rpc'
+import type { IPCChannel, IPCData, IPCParams } from '@sdk/types/ipc'
+import type { RPCResult } from '@sdk/core/rpc'
 import { SDKError } from '@sdk/core/error'
 
 type RequestInterceptor = <C extends IPCChannel>(

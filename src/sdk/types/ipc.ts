@@ -3,7 +3,7 @@
 // ============================================
 
 import type { User, Chat, Message } from './models'
-import type { RPCResult } from '@contracts/rpc'
+import type { RPCResult } from '../core/rpc'
 
 /**
  * 定义主进程和渲染进程之间的 IPC 通信接口
@@ -14,7 +14,7 @@ import type { RPCResult } from '@contracts/rpc'
  * - result: 响应结果类型
  */
 export interface IPCChannels {
-  // Database operations
+  // Database operations (keep for internal use)
   'db:query': { params: QueryParams; result: RPCResult<QueryResult> }
   'db:insert': { params: InsertParams; result: RPCResult<InsertResult> }
   'db:update': { params: UpdateParams; result: RPCResult<UpdateResult> }
@@ -24,14 +24,26 @@ export interface IPCChannels {
   'auth:login': { params: LoginParams; result: RPCResult<User> }
   'auth:register': { params: RegisterParams; result: RPCResult<User> }
   'auth:logout': { params: LogoutParams; result: RPCResult<void> }
-  'auth:getCurrentUser': { params: GetCurrentUserParams; result: RPCResult<User | null> }
+  'auth:me': { params: void; result: RPCResult<User | null> }
 
-  // Chat operations
-  'chat:getChats': { params: void; result: RPCResult<Chat[]> }
-  'chat:getChatById': { params: GetChatByIdParams; result: RPCResult<Chat | null> }
+  // Chat/Messaging operations
+  'chat:getConversations': { params: void; result: RPCResult<Chat[]> }
+  'chat:getConversationById': { params: GetChatByIdParams; result: RPCResult<Chat | null> }
   'chat:getMessages': { params: GetMessagesParams; result: RPCResult<Message[]> }
   'chat:sendMessage': { params: SendMessageParams; result: RPCResult<Message> }
 }
+
+/**
+ * 定义服务端推送给客户端的事件
+ */
+export interface IPCEvents {
+  'chat:message': Message
+  'chat:unreadCount': { chatId: string; unreadCount: number }
+  'auth:status': { userId: string; status: import('./models').UserStatus }
+}
+
+export type IPCEvent = keyof IPCEvents
+export type IPCEventPayload<E extends IPCEvent> = IPCEvents[E]
 
 // ============================================
 // Type Utilities

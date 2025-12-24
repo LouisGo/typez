@@ -1,4 +1,4 @@
-import type { Chat, Message } from '@shared/types/models'
+import type { Chat, Message } from '@sdk/types/models'
 
 /**
  * 聊天服务接口

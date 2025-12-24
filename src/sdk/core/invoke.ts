@@ -1,5 +1,5 @@
-import type { IPCChannel, IPCData, IPCParams } from '@shared/types/ipc'
-import type { RPCResult } from '@contracts/rpc'
+import type { IPCChannel, IPCData, IPCParams } from '../types/ipc'
+import type { RPCResult } from './rpc'
 import { SDKError } from '@sdk/core/error'
 import type { Transport } from '@sdk/core/transport'
 

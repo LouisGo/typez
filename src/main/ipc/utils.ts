@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
-import type { IPCChannel, IPCData, IPCParams, IPCResult } from '@shared/types/ipc'
-import { AuthError } from '@shared/types/auth-errors'
-import type { RPCError, RPCResult } from '@contracts/rpc'
-import { CommonErrorCode, ErrorDomain, makeErrorCode } from '@contracts/rpc'
+import type { IPCChannel, IPCData, IPCParams, IPCResult } from '@sdk/types/ipc'
+import { AuthError } from '@sdk/auth/errors'
+import type { RPCError, RPCResult } from '@sdk/core/rpc'
+import { CommonErrorCode, ErrorDomain, makeErrorCode } from '@sdk/core/rpc'
 
 type Awaitable<T> = T | Promise<T>
 
@@ -18,8 +18,8 @@ function normalizeDomainCode(input: {
 }
 
 function tryMapSqliteError(error: Error): RPCError | null {
-  const anyErr = error as any
-  const rawCode: unknown = anyErr?.code
+  const sqliteErr = error as unknown as Record<string, unknown>
+  const rawCode: unknown = sqliteErr?.code
   const message = error.message || '数据库错误'
 
   // 常见 sqlite code：SQLITE_CONSTRAINT / SQLITE_BUSY / SQLITE_ERROR ...
@@ -61,10 +61,10 @@ function serializeError(error: unknown): RPCError {
 
   // 如果上游已经按规范提供了 code（跨模块/未来扩展），尽量保留
   if (error && typeof error === 'object') {
-    const anyErr = error as any
-    const code: unknown = anyErr?.code
-    const message: unknown = anyErr?.message
-    const details: unknown = anyErr?.details
+    const errObj = error as Record<string, unknown>
+    const code: unknown = errObj?.code
+    const message: unknown = errObj?.message
+    const details: unknown = errObj?.details
 
     if (isDomainCode(code)) {
       return {

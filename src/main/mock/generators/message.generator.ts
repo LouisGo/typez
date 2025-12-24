@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
-import type { MessageTable, MessageType } from '@shared/types/database'
+import type { MessageTable } from '../../database/types'
+import type { MessageType } from '@sdk/types/models'
 
 /**
  * Message Mock Data Generator

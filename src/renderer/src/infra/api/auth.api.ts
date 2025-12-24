@@ -41,7 +41,7 @@ export const authAPI = {
    * @param userId - 用户 ID
    * @returns Promise<User | null> - 用户信息或 null（camelCase）
    */
-  getCurrentUser: (userId: string) => {
-    return typezClient.auth.getCurrentUser(userId)
+  getCurrentUser: () => {
+    return typezClient.auth.me()
   }
 }

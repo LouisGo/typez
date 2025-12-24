@@ -1,4 +1,4 @@
-import type { Id } from '../../kernel/branded'
+import type { Id } from '../../core/branded'
 
 export type UserId = Id<'user'>
 export type ChatId = Id<'chat'>
