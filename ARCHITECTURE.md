@@ -64,30 +64,82 @@ src/
 | Animation    | Framer Motion   | 12.x    | 丝滑 UI 动效        |
 | Database     | better-sqlite3  | 12.x    | 嵌入式高性能数据库  |
 
-## 📊 Data Flow
+## 📊 Data Flow & Synchronization
+
+### Request-Response Flow (IPC)
 
 ```mermaid
 graph TD
-    Renderer[Renderer View] --> API[Infra API Layer]
-    API --> SDK[SDK Client]
-    SDK --> Transport[Electron Transport]
-    Transport -- IPC --> Main[Main Process Service]
-    Main --> DB[(SQLite Database)]
-    DB -- snake_case --> Main
-    Main -- camelCase --> RPC[RPCResult Package]
-    RPC -- IPC --> Transport
-    Transport --> SDK
-    SDK --> API
-    API --> Renderer
+    subgraph "Renderer Process (UI)"
+        View[React Components]
+        Store[Zustand State]
+        Infra[Infra API / SDK Instance]
+    end
+
+    subgraph "SDK Layer (Runtime)"
+        Client[TypezClient]
+        AuthMgr[AuthManager / Client Session]
+        Protocol[Protocol Envelope OK/ERR]
+        Transport[Electron Renderer Transport]
+    end
+
+    subgraph "Preload Layer (Security Bridge)"
+        API[window.api / Context Bridge]
+    end
+
+    subgraph "Main Process (Core)"
+        IPC[IPC Handlers / Router]
+        Services[Business Services]
+        Trans[Transformer snake_case <=> camelCase]
+        DB[(SQLite Database)]
+    end
+
+    %% UI to SDK
+    View --> Store
+    Store --> Infra
+    Infra --> Client
+    Client --> AuthMgr
+
+    %% SDK to Preload
+    Transport -- "(window.api)" --> API
+
+    %% Preload to Main
+    API -- "ipcRenderer.invoke" --> IPC
+
+    %% Main to DB
+    IPC --> Services
+    Services --> Trans
+    Trans --> DB
+
+    %% Response Path
+    DB --> Trans
+    Trans --> Services
+    Services --> IPC
+    IPC -- "ProtocolResult" --> API
+    API --> Protocol
+    Protocol --> Client
+    Client --> Store
+    Store --> View
 ```
+
+### Session Persistence Mechanism
+
+为了保证跨页面刷新和应用重启后的登录状态一致性，项目实现了**双层持久化同步**：
+
+1.  **Renderer 层**：使用 `zustand/middleware/persist` 将基本用户信息（User ID 等）存入 `localStorage` (`auth-storage`)。
+2.  **SDK 层**：`AuthManager` 独立维护内存中的 Session，并在初始化时从 `localStorage` 回填，确保 SDK API 随时可用。
+3.  **Main 层**：在 SQLite 数据库中维护 `app_state` 表（Key-Value），持久化存储 `current_user_id`。
+4.  **同步逻辑**：应用启动时，渲染进程调用 `auth:me`。主进程会检查 `app_state` 尝试恢复会话。若匹配成功，则实现“无感自动登录”。
 
 ## 🎯 Key Design Principles
 
-1.  **Type-First Development**: 所有接口通过 `ipc.ts` 契约强制约束，实现“接口变动，编译报错”。
-2.  **Decoupled SDK**: 渲染进程不直接调用 `window.api`，而是通过封装好的 SDK，降低环境耦合。
-3.  **Strict Error Handling**: 定义标准的 RPC 异常链路，区分业务错误与系统错误。
-4.  **Snake-to-Camel Logic**: 数据库层坚持 SQL 标准命名，出口层统一转化为 JS 标准命名，职责在主进程 Service 完成。
-5.  **Mockable Services**: 支持在主进程中通过环境变量无缝切换 Real/Mock 服务实现。
+1.  **Type-First Development**: 所有接口通过 `src/sdk/contract/index.ts` 契约强制约束，实现“接口变动，编译报错”。
+2.  **Decoupled SDK**: 渲染进程不直接调用 `window.api`，而是通过封装好的 SDK，确保业务逻辑在不同平台（Web/Electron）的移植性。
+3.  **Envelope Protocol**: 采用 `ProtocolResult<T>` 统一包装所有响应，内建错误代码（ErrorCode）系统，区分“传输错误”、“业务逻辑错误”和“数据库异常”。
+4.  **Snake-to-Camel Logic**: SQL 层坚持 `snake_case`（符合传统 DB 规范），业务层统一使用 `camelCase`。映射职责由主进程 `transformers.ts` 完成。
+5.  **Multi-Session Safety**:
+    - **Main**: 状态从数据库恢复，确保进程异常退出后可找回。
+    - **Renderer**: `initialize` 方法带并发锁（Loading 状态），防止页面刷新时重复发起初始化请求。
 
 ---
 
