@@ -100,6 +100,12 @@ CREATE TABLE IF NOT EXISTS media (
   FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
 );
 
+-- App state table (singleton state)
+CREATE TABLE IF NOT EXISTS app_state (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);

@@ -87,24 +87,33 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
 
       initialize: async () => {
+        const { isInitialized, isLoading } = get()
+        if (isInitialized || isLoading) return
+
+        set({ isLoading: true })
         const { user } = get()
         if (user?.id) {
           try {
             // 验证用户是否仍然有效
             const currentUser = await authAPI.getCurrentUser()
             if (currentUser) {
-              set({ user: currentUser, isAuthenticated: true, isInitialized: true })
+              set({
+                user: currentUser,
+                isAuthenticated: true,
+                isInitialized: true,
+                isLoading: false
+              })
             } else {
               // 用户不存在，清除登录状态
-              set({ user: null, isAuthenticated: false, isInitialized: true })
+              set({ user: null, isAuthenticated: false, isInitialized: true, isLoading: false })
             }
           } catch (error) {
             console.error('初始化用户状态失败:', error)
             // 初始化失败，清除登录状态
-            set({ user: null, isAuthenticated: false, isInitialized: true })
+            set({ user: null, isAuthenticated: false, isInitialized: true, isLoading: false })
           }
         } else {
-          set({ isInitialized: true })
+          set({ isInitialized: true, isLoading: false })
         }
       }
     }),

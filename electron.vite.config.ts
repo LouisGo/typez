@@ -9,7 +9,7 @@ export default defineConfig({
       alias: {
         '@shared': resolve('src/shared'),
         '@main': resolve('src/main'),
-        '@contracts': resolve('src/contracts')
+        '@sdk': resolve('src/sdk')
       }
     },
     build: {
@@ -22,7 +22,7 @@ export default defineConfig({
     resolve: {
       alias: {
         '@shared': resolve('src/shared'),
-        '@contracts': resolve('src/contracts')
+        '@sdk': resolve('src/sdk')
       }
     }
   },
@@ -34,7 +34,6 @@ export default defineConfig({
         '@components': resolve('src/renderer/src/components'),
         '@shared': resolve('src/shared'),
         '@infra': resolve('src/renderer/src/infra'),
-        '@contracts': resolve('src/contracts'),
         '@sdk': resolve('src/sdk')
       }
     },

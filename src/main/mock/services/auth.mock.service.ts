@@ -90,6 +90,18 @@ export class MockAuthService implements IAuthService {
     })
 
     this.currentUserId = userTable.id as UserId
+
+    // 为持久化会话，保存到 app_state
+    try {
+      this.db.delete({ table: 'app_state', where: { key: 'current_user_id' } })
+      this.db.insert({
+        table: 'app_state',
+        data: { key: 'current_user_id', value: this.currentUserId }
+      })
+    } catch (e) {
+      console.error('[MockAuthService] Failed to persist session:', e)
+    }
+
     return userTableToUser(userTable)
   }
 
@@ -130,6 +142,18 @@ export class MockAuthService implements IAuthService {
     })
 
     this.currentUserId = userId as UserId
+
+    // 为持久化会话，保存到 app_state
+    try {
+      this.db.delete({ table: 'app_state', where: { key: 'current_user_id' } })
+      this.db.insert({
+        table: 'app_state',
+        data: { key: 'current_user_id', value: this.currentUserId }
+      })
+    } catch (e) {
+      console.error('[MockAuthService] Failed to persist session during register:', e)
+    }
+
     const user = await this.getCurrentUser(userId as UserId)
     return user!
   }
@@ -144,11 +168,28 @@ export class MockAuthService implements IAuthService {
     })
     if (this.currentUserId === userId) {
       this.currentUserId = null
+      this.db.delete({
+        table: 'app_state',
+        where: { key: 'current_user_id' }
+      })
     }
   }
 
   async getCurrentUser(userId?: UserId): Promise<User | null> {
-    const id = userId || this.currentUserId
+    let id = userId || this.currentUserId
+
+    // 如果内存中没有且没有传入 ID，尝试从数据库恢复
+    if (!id) {
+      const result = this.db.query({
+        table: 'app_state',
+        where: { key: 'current_user_id' }
+      })
+      if (result.rows.length > 0) {
+        id = (result.rows[0] as { value: string }).value as UserId
+        this.currentUserId = id
+      }
+    }
+
     if (!id) return null
 
     const result = this.db.query({

@@ -43,6 +43,7 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
       },
       me: async () => {
         const user = await invokeOrThrow(transport, 'auth:me')
+        if (user && auth) await auth.setSession({ user })
         return user
       },
       /**

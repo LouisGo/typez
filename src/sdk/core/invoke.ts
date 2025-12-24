@@ -11,8 +11,9 @@ export async function invokeOrThrow<C extends APIChannel>(
   let result: ProtocolResult<ContractData<C>>
   try {
     result = (await transport.request(channel, params)) as ProtocolResult<ContractData<C>>
-  } catch (e) {
-    throw SDKError.transportError('Transport 调用失败', e)
+  } catch (e: unknown) {
+    const detail = e instanceof Error ? e.message : String(e)
+    throw SDKError.transportError(`Transport 调用失败: ${detail}`, e)
   }
 
   if (result.ok) return result.data
