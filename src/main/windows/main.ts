@@ -45,5 +45,6 @@ export function createMainWindow(): void {
     })
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.webContents.openDevTools()
   }
 }

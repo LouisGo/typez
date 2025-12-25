@@ -5,6 +5,7 @@ import { RouterProvider } from '@tanstack/react-router'
 import { router } from '@renderer/app/router'
 import { useAuthStore } from '@renderer/stores'
 import { ThemeProvider } from '@/components/theme/Provider'
+import { Toaster } from 'sonner'
 
 const queryClient = new QueryClient()
 
@@ -26,6 +27,7 @@ export function AppProviders() {
     <QueryClientProvider client={queryClient}>
       <AuthInitializer />
       <ThemeProvider defaultTheme="system" storageKey="typez-theme">
+        <Toaster position="top-center" />
         <RouterProvider router={router} />
       </ThemeProvider>
     </QueryClientProvider>

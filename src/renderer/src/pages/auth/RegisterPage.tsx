@@ -22,6 +22,7 @@ import {
   FormMessage
 } from '@components/ui/form'
 import { useRegister, registerSchema, type RegisterFormValues } from '@infra/api'
+import { Field, FieldLabel } from '@/components/ui/field'
 
 export function RegisterPage() {
   const registerMutation = useRegister()
@@ -58,7 +59,7 @@ export function RegisterPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {registerMutation.isError && (
-              <div className="bg-destructive/15 text-destructive rounded-md p-3 text-sm">
+              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
                 {registerMutation.error instanceof Error
                   ? registerMutation.error.message
                   : '注册失败，请检查输入信息'}
@@ -70,19 +71,18 @@ export function RegisterPage() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>用户名</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="例如：louis（3-20个字符，字母、数字、下划线）"
-                      autoComplete="username"
-                      disabled={registerMutation.isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    用户名至少需要 3 个字符，只能包含字母、数字和下划线
-                  </FormDescription>
-                  <FormMessage />
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>用户名</FieldLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="例如：louis（3-20个字符，字母、数字、下划线）"
+                        autoComplete="username"
+                        disabled={registerMutation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </Field>
                 </FormItem>
               )}
             />
@@ -92,16 +92,18 @@ export function RegisterPage() {
               name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>显示名称</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="例如：Louis"
-                      autoComplete="nickname"
-                      disabled={registerMutation.isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>显示名称</FieldLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="例如：Louis"
+                        autoComplete="nickname"
+                        disabled={registerMutation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </Field>
                 </FormItem>
               )}
             />
@@ -111,18 +113,19 @@ export function RegisterPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>密码</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="设置密码（至少 6 个字符）"
-                      autoComplete="new-password"
-                      disabled={registerMutation.isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>密码至少需要 6 个字符</FormDescription>
-                  <FormMessage />
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>密码</FieldLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="设置密码（至少 6 个字符）"
+                        autoComplete="new-password"
+                        disabled={registerMutation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </Field>
                 </FormItem>
               )}
             />
@@ -132,24 +135,28 @@ export function RegisterPage() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>确认密码</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="请再次输入密码"
-                      autoComplete="new-password"
-                      disabled={registerMutation.isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>确认密码</FieldLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="请再次输入密码"
+                        autoComplete="new-password"
+                        disabled={registerMutation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </Field>
                 </FormItem>
               )}
             />
 
-            <Button className="w-full" type="submit" disabled={registerMutation.isPending}>
-              {registerMutation.isPending ? '注册中...' : '注册'}
-            </Button>
+            <Field>
+              <Button className="w-full" type="submit" disabled={registerMutation.isPending}>
+                {registerMutation.isPending ? '注册中...' : '注册'}
+              </Button>
+            </Field>
           </form>
         </Form>
       </CardContent>

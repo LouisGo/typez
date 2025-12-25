@@ -3,7 +3,8 @@ import {
   createRootRoute,
   createRoute,
   redirect,
-  Outlet
+  Outlet,
+  createHashHistory
 } from '@tanstack/react-router'
 
 import { AppShell } from '@renderer/app/shell/AppShell'
@@ -126,7 +127,10 @@ const routeTree = rootRoute.addChildren([
   ])
 ])
 
-export const router = createRouter({ routeTree })
+export const router = createRouter({
+  routeTree,
+  history: createHashHistory()
+})
 
 declare module '@tanstack/react-router' {
   interface Register {
