@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig({
   main: {
@@ -43,7 +44,10 @@ export default defineConfig({
           plugins: ['babel-plugin-react-compiler']
         }
       }),
-      tailwindcss() as any
+      tailwindcss() as any,
+      codeInspectorPlugin({
+        bundler: 'vite'
+      })
     ]
   }
 })

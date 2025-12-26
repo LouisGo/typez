@@ -4,6 +4,8 @@ import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
 import { Separator } from '@components/ui/separator'
 import { Textarea } from '@components/ui/textarea'
+import { RippleButton } from '@/components/ui/ripple-button'
+import { RingButton } from '@/components/ui/ring-button'
 
 export function ChatThreadPage() {
   const { chatId } = useParams({ from: '/app/chats/$chatId' })
@@ -26,21 +28,21 @@ export function ChatThreadPage() {
 
       <div className="min-h-0 flex-1 overflow-auto p-4">
         <div className="space-y-3">
-          <div className="bg-muted/10 text-muted-foreground rounded-xl border p-4 text-sm">
+          <div className="rounded-xl border bg-muted/10 p-4 text-sm text-muted-foreground">
             （占位）消息列表区域：后续接入虚拟列表 / 分页 / 已读等逻辑
           </div>
 
           <div className="flex justify-start">
-            <div className="bg-muted w-[min(520px,85%)] rounded-2xl p-3">
-              <div className="bg-background/60 h-3 w-28 rounded" />
-              <div className="bg-background/60 mt-2 h-3 w-64 rounded" />
+            <div className="w-[min(520px,85%)] rounded-2xl bg-muted p-3">
+              <div className="h-3 w-28 rounded bg-background/60" />
+              <div className="mt-2 h-3 w-64 rounded bg-background/60" />
             </div>
           </div>
 
           <div className="flex justify-end">
-            <div className="bg-primary w-[min(520px,85%)] rounded-2xl p-3">
-              <div className="bg-primary-foreground/70 h-3 w-20 rounded" />
-              <div className="bg-primary-foreground/70 mt-2 h-3 w-56 rounded" />
+            <div className="w-[min(520px,85%)] rounded-2xl bg-primary p-3">
+              <div className="h-3 w-20 rounded bg-primary-foreground/70" />
+              <div className="mt-2 h-3 w-56 rounded bg-primary-foreground/70" />
             </div>
           </div>
         </div>
@@ -50,7 +52,7 @@ export function ChatThreadPage() {
       <div className="p-3">
         <div className="flex gap-2">
           <Textarea className="min-h-10 resize-none" placeholder="输入消息…" rows={1} />
-          <Button type="button">发送（占位）</Button>
+          <RingButton type="button">发送（占位）</RingButton>
         </div>
       </div>
     </div>
