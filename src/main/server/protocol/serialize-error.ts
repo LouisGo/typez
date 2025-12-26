@@ -1,9 +1,6 @@
-import type { APIChannel, ContractData, ContractParams, ContractResult } from '@sdk/contract'
 import { AuthError } from '@sdk/auth/errors'
-import type { ProtocolError, ProtocolResult } from '@sdk/core/protocol'
+import type { ProtocolError } from '@sdk/core/protocol'
 import { CommonErrorCode, ErrorDomain, makeErrorCode } from '@sdk/core/protocol'
-
-type Awaitable<T> = T | Promise<T>
 
 function isDomainCode(value: unknown): value is string {
   return typeof value === 'string' && value.includes('/')
@@ -50,7 +47,7 @@ function tryMapSqliteError(error: Error): ProtocolError | null {
   return null
 }
 
-function serializeError(error: unknown): ProtocolError {
+export function serializeError(error: unknown): ProtocolError {
   if (error instanceof AuthError) {
     return {
       code: normalizeDomainCode({ domain: ErrorDomain.AUTH, code: String(error.code) }),
@@ -91,32 +88,4 @@ function serializeError(error: unknown): ProtocolError {
     code: CommonErrorCode.INTERNAL_ERROR,
     message: '未知错误'
   }
-}
-
-import { ipcMain } from 'electron'
-
-/**
- * 类型安全的 IPC Handler 创建函数
- * 确保 handler 的参数和返回值类型与 APIContract 定义一致
- *
- * @template C - API Channel 名称
- * @param channel - API Channel 名称
- * @param handler - 处理函数，接收 params 并返回 Promise<result>
- */
-export function createHandler<C extends APIChannel>(
-  channel: C,
-  handler: (params: ContractParams<C>) => Awaitable<ContractData<C>>
-): void {
-  ipcMain.handle(channel, async (_, params: ContractParams<C>) => {
-    try {
-      console.log(`[IPC] ${channel}`, params)
-      const data = await handler(params)
-      const result: ProtocolResult<ContractData<C>> = { ok: true, data }
-      return result as ContractResult<C>
-    } catch (error) {
-      console.error(`[IPC] ${channel} error:`, error)
-      const result: ProtocolResult<ContractData<C>> = { ok: false, error: serializeError(error) }
-      return result as ContractResult<C>
-    }
-  })
 }

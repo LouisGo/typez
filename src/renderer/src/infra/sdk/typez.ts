@@ -1,4 +1,4 @@
-import { AuthManager, createElectronRendererTransport, createTypezClient } from '@sdk'
+import { AuthManager, createHttpRendererTransport, createTypezClient } from '@sdk'
 import { createLocalStorageAdapter } from './storage'
 import type { AuthSession } from '@sdk/auth/auth-manager'
 
@@ -10,6 +10,6 @@ export const authManager = new AuthManager(createLocalStorageAdapter<AuthSession
 void authManager.init()
 
 export const typezClient = createTypezClient({
-  transport: createElectronRendererTransport(),
+  transport: createHttpRendererTransport({ baseUrl: 'http://127.0.0.1:3456' }),
   auth: authManager
 })

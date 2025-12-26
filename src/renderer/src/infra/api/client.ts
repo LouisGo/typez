@@ -1,6 +1,5 @@
 import type { APIChannel, ContractData, ContractParams } from '@sdk/contract'
-import type { ProtocolResult } from '@sdk/core/protocol'
-import { SDKError } from '@sdk/core/error'
+import { typezClient } from '@infra/sdk'
 
 type RequestInterceptor = <C extends APIChannel>(
   channel: C,
@@ -10,11 +9,6 @@ type RequestInterceptor = <C extends APIChannel>(
 type ResponseInterceptor = <T>(data: T) => T
 
 type ErrorHandler = (error: unknown) => void
-
-function unwrapOrThrow<T>(result: ProtocolResult<T>): T {
-  if (result.ok) return result.data
-  throw SDKError.fromProtocolError(result.error)
-}
 
 /**
  * API 客户端
@@ -56,19 +50,16 @@ class APIClient {
 
       // 3. 调用 IPC
       const startTime = Date.now()
-      const rpcResult = (await window.api.invoke(
-        processedChannel,
-        processedParams
-      )) as unknown as ProtocolResult<ContractData<C>>
+      const data = await typezClient.invoke(processedChannel, processedParams)
       const duration = Date.now() - startTime
 
       // 4. 记录响应日志
       if (isDev) {
-        console.log(`[API] ← ${processedChannel} (${duration}ms)`, rpcResult)
+        console.log(`[API] ← ${processedChannel} (${duration}ms)`, data)
       }
 
       // 5. 响应拦截
-      let processedResult: ContractData<C> = unwrapOrThrow(rpcResult)
+      let processedResult: ContractData<C> = data
       for (const interceptor of this.responseInterceptors) {
         processedResult = interceptor(processedResult) as ContractData<C>
       }
