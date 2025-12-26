@@ -1,4 +1,4 @@
-import type { Chat, Message, ChatId, UserId } from '@sdk/contract/models'
+import type { Chat, Message, ChatId, ChatUserSettings, MessageId } from '@sdk/contract/models'
 
 /**
  * 聊天服务接口
@@ -9,4 +9,10 @@ export interface IChatService {
   getChatById(id: ChatId): Promise<Chat | null>
   getMessages(chatId: ChatId, limit?: number, offset?: number): Promise<Message[]>
   sendMessage(chatId: ChatId, content: string): Promise<Message>
+  getSettings(chatId: ChatId): Promise<ChatUserSettings | null>
+  updateSettings(
+    chatId: ChatId,
+    input: { pinned?: boolean; muted?: boolean; archived?: boolean }
+  ): Promise<ChatUserSettings>
+  markRead(chatId: ChatId, lastReadMessageId?: MessageId): Promise<void>
 }

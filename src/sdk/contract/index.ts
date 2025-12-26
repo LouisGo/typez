@@ -2,7 +2,17 @@
 // API Contract Definitions
 // ============================================
 
-import type { User, Chat, Message, UserId, ChatId } from './models'
+import type {
+  User,
+  Chat,
+  Message,
+  UserId,
+  ChatId,
+  Contact,
+  ContactRequest,
+  ContactRequestId,
+  ChatUserSettings
+} from './models'
 import type { ProtocolResult } from '../core/protocol'
 
 /**
@@ -22,6 +32,32 @@ export interface APIContract {
   'chat:getMessages': { params: GetMessagesParams; result: ProtocolResult<Message[]> }
   'chat:sendMessage': { params: SendMessageParams; result: ProtocolResult<Message> }
 
+  // Chat settings / read state
+  'chat:getSettings': {
+    params: GetChatSettingsParams
+    result: ProtocolResult<ChatUserSettings | null>
+  }
+  'chat:updateSettings': {
+    params: UpdateChatSettingsParams
+    result: ProtocolResult<ChatUserSettings>
+  }
+  'chat:markRead': { params: MarkChatReadParams; result: ProtocolResult<void> }
+
+  // Group operations
+  'group:create': { params: CreateGroupParams; result: ProtocolResult<Chat> }
+  'group:addMembers': { params: AddGroupMembersParams; result: ProtocolResult<void> }
+  'group:updateProfile': { params: UpdateGroupProfileParams; result: ProtocolResult<Chat> }
+
+  // Contact operations
+  'contact:list': { params: void; result: ProtocolResult<Contact[]> }
+  'contact:request': { params: CreateContactRequestParams; result: ProtocolResult<ContactRequest> }
+  'contact:respondRequest': { params: RespondContactRequestParams; result: ProtocolResult<Contact> }
+  'contact:blockUser': { params: BlockUserParams; result: ProtocolResult<void> }
+
+  // Search operations
+  'search:users': { params: SearchUsersParams; result: ProtocolResult<User[]> }
+  'search:messages': { params: SearchMessagesParams; result: ProtocolResult<Message[]> }
+
   // Database operations (internal/legacy)
   'db:query': { params: QueryParams; result: ProtocolResult<QueryResult> }
   'db:insert': { params: InsertParams; result: ProtocolResult<InsertResult> }
@@ -36,6 +72,7 @@ export interface EventContract {
   'chat:message': Message
   'chat:unreadCount': { chatId: ChatId; unreadCount: number }
   'auth:status': { userId: UserId; status: import('./models').UserStatus }
+  'contact:request': ContactRequest
 }
 
 export type EventChannel = keyof EventContract
@@ -88,6 +125,84 @@ export interface GetMessagesParams {
 export interface SendMessageParams {
   chatId: ChatId
   content: string
+}
+
+// ============================================
+// Chat Settings Params
+// ============================================
+
+export interface GetChatSettingsParams {
+  chatId: ChatId
+}
+
+export interface UpdateChatSettingsParams {
+  chatId: ChatId
+  pinned?: boolean
+  muted?: boolean
+  archived?: boolean
+}
+
+export interface MarkChatReadParams {
+  chatId: ChatId
+  lastReadMessageId?: import('./models').MessageId
+}
+
+// ============================================
+// Group Params
+// ============================================
+
+export interface CreateGroupParams {
+  title: string
+  memberIds: UserId[]
+  description?: string
+}
+
+export interface AddGroupMembersParams {
+  chatId: ChatId
+  memberIds: UserId[]
+}
+
+export interface UpdateGroupProfileParams {
+  chatId: ChatId
+  title?: string
+  avatarUrl?: string | null
+  description?: string | null
+}
+
+// ============================================
+// Contact Params
+// ============================================
+
+export interface CreateContactRequestParams {
+  toUserId: UserId
+  message?: string
+}
+
+export interface RespondContactRequestParams {
+  requestId: ContactRequestId
+  action: 'accept' | 'reject' | 'cancel'
+}
+
+export interface BlockUserParams {
+  userId: UserId
+  blocked: boolean
+}
+
+// ============================================
+// Search Params
+// ============================================
+
+export interface SearchUsersParams {
+  query: string
+  limit?: number
+  offset?: number
+}
+
+export interface SearchMessagesParams {
+  query: string
+  chatId?: ChatId
+  limit?: number
+  offset?: number
 }
 
 // ============================================

@@ -2,6 +2,12 @@
 -- Initial Database Schema
 -- ============================================
 
+-- Schema migrations table
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  id TEXT PRIMARY KEY,
+  applied_at INTEGER NOT NULL
+);
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
@@ -93,6 +99,12 @@ CREATE TABLE IF NOT EXISTS media (
   duration INTEGER,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+);
+
+-- App state table (singleton state)
+CREATE TABLE IF NOT EXISTS app_state (
+  key TEXT PRIMARY KEY,
+  value TEXT
 );
 
 -- Indexes for performance

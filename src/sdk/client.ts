@@ -1,7 +1,7 @@
 import type { Transport } from '@sdk/core/transport'
 import { invokeOrThrow } from '@sdk/core/invoke'
 import type { AuthManager } from '@sdk/auth/auth-manager'
-import type { User, UserId, ChatId } from './contract/models'
+import type { User, UserId, ChatId, ContactRequestId } from './contract/models'
 import type { APIChannel, ContractParams } from './contract'
 
 export type TypezClient = ReturnType<typeof createTypezClient>
@@ -59,7 +59,42 @@ export function createTypezClient(input: { transport: Transport; auth?: AuthMana
       getMessages: (chatId: ChatId, limit?: number, offset?: number) =>
         invokeOrThrow(transport, 'chat:getMessages', { chatId, limit, offset }),
       sendMessage: (chatId: ChatId, content: string) =>
-        invokeOrThrow(transport, 'chat:sendMessage', { chatId, content })
+        invokeOrThrow(transport, 'chat:sendMessage', { chatId, content }),
+      getSettings: (chatId: ChatId) => invokeOrThrow(transport, 'chat:getSettings', { chatId }),
+      updateSettings: (
+        chatId: ChatId,
+        input: { pinned?: boolean; muted?: boolean; archived?: boolean }
+      ) => invokeOrThrow(transport, 'chat:updateSettings', { chatId, ...input }),
+      markRead: (chatId: ChatId, lastReadMessageId?: import('./contract/models').MessageId) =>
+        invokeOrThrow(transport, 'chat:markRead', { chatId, lastReadMessageId })
+    },
+
+    group: {
+      create: (input: { title: string; memberIds: UserId[]; description?: string }) =>
+        invokeOrThrow(transport, 'group:create', input),
+      addMembers: (chatId: ChatId, memberIds: UserId[]) =>
+        invokeOrThrow(transport, 'group:addMembers', { chatId, memberIds }),
+      updateProfile: (
+        chatId: ChatId,
+        input: { title?: string; avatarUrl?: string | null; description?: string | null }
+      ) => invokeOrThrow(transport, 'group:updateProfile', { chatId, ...input })
+    },
+
+    contact: {
+      list: () => invokeOrThrow(transport, 'contact:list'),
+      request: (toUserId: UserId, message?: string) =>
+        invokeOrThrow(transport, 'contact:request', { toUserId, message }),
+      respondRequest: (requestId: ContactRequestId, action: 'accept' | 'reject' | 'cancel') =>
+        invokeOrThrow(transport, 'contact:respondRequest', { requestId, action }),
+      blockUser: (userId: UserId, blocked: boolean) =>
+        invokeOrThrow(transport, 'contact:blockUser', { userId, blocked })
+    },
+
+    search: {
+      users: (query: string, limit?: number, offset?: number) =>
+        invokeOrThrow(transport, 'search:users', { query, limit, offset }),
+      messages: (query: string, input?: { chatId?: ChatId; limit?: number; offset?: number }) =>
+        invokeOrThrow(transport, 'search:messages', { query, ...input })
     }
   }
 

@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
   phone TEXT,
   bio TEXT,
   status TEXT NOT NULL DEFAULT 'offline' CHECK(status IN ('online', 'offline', 'away', 'busy')),
+  kind TEXT NOT NULL DEFAULT 'human' CHECK(kind IN ('human', 'bot', 'system')),
+  deleted_at INTEGER,
   last_seen INTEGER NOT NULL,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL

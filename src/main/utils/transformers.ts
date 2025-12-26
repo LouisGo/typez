@@ -18,6 +18,8 @@ export function userTableToUser(table: UserTable): User {
     phone: table.phone,
     bio: table.bio,
     status: table.status,
+    kind: table.kind ?? 'human',
+    deletedAt: table.deleted_at ?? null,
     lastSeen: table.last_seen,
     createdAt: table.created_at,
     updatedAt: table.updated_at
@@ -39,6 +41,9 @@ export function chatTableToChat(table: ChatTable): Chat {
     lastMessageAt: table.last_message_at,
     pinned: table.pinned,
     muted: table.muted,
+    createdBy: (table.created_by as UserId | null) ?? null,
+    metadata: table.metadata ?? null,
+    deletedAt: table.deleted_at ?? null,
     createdAt: table.created_at,
     updatedAt: table.updated_at
   }
@@ -58,6 +63,10 @@ export function messageTableToMessage(table: MessageTable): Message {
     forwardedFromId: table.forwarded_from_id as MessageId | null,
     edited: table.edited,
     read: table.read,
+    clientId: table.client_id ?? null,
+    status: table.status,
+    editedAt: table.edited_at ?? null,
+    deletedAt: table.deleted_at ?? null,
     createdAt: table.created_at,
     updatedAt: table.updated_at
   }

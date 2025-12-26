@@ -132,6 +132,8 @@ export class AuthService implements IAuthService {
         phone: '',
         bio: '',
         status: 'online',
+        kind: 'human',
+        deleted_at: null,
         last_seen: now,
         created_at: now,
         updated_at: now

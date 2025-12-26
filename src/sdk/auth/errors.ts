@@ -18,6 +18,8 @@ export enum AuthErrorCode {
   INVALID_PASSWORD_FORMAT = 'INVALID_PASSWORD_FORMAT',
   /** 显示名称格式无效 */
   INVALID_DISPLAY_NAME = 'INVALID_DISPLAY_NAME',
+  /** 未登录/会话无效 */
+  NOT_LOGGED_IN = 'NOT_LOGGED_IN',
   /** 未知错误 */
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
@@ -48,5 +50,7 @@ export const createAuthError = {
     new AuthError(AuthErrorCode.INVALID_PASSWORD_FORMAT, message || '密码格式无效'),
   invalidDisplayName: (message?: string) =>
     new AuthError(AuthErrorCode.INVALID_DISPLAY_NAME, message || '显示名称格式无效'),
+  notLoggedIn: (message?: string) =>
+    new AuthError(AuthErrorCode.NOT_LOGGED_IN, message || '请先登录'),
   unknown: (message?: string) => new AuthError(AuthErrorCode.UNKNOWN_ERROR, message || '未知错误')
 }

@@ -21,6 +21,8 @@ export class UserGenerator {
       phone: faker.phone.number(),
       bio: faker.lorem.sentence(),
       status: faker.helpers.arrayElement<UserStatus>(['online', 'offline', 'away', 'busy']),
+      kind: 'human',
+      deleted_at: null,
       last_seen: now - faker.number.int({ min: 0, max: 86400000 }), // Last 24h
       created_at: now - faker.number.int({ min: 86400000, max: 31536000000 }), // Last year
       updated_at: now

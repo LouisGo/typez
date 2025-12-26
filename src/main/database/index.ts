@@ -2,118 +2,7 @@ import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'path'
 import type { QueryParams, QueryResult, InsertParams, InsertResult } from '@sdk/contract'
-
-/**
- * Initial database schema SQL
- */
-const INIT_SQL = `
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  username TEXT NOT NULL UNIQUE,
-  display_name TEXT NOT NULL,
-  password TEXT NOT NULL,
-  avatar_url TEXT,
-  phone TEXT,
-  bio TEXT,
-  status TEXT NOT NULL DEFAULT 'offline' CHECK(status IN ('online', 'offline', 'away', 'busy')),
-  last_seen INTEGER NOT NULL,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-
--- Chats table
-CREATE TABLE IF NOT EXISTS chats (
-  id TEXT PRIMARY KEY,
-  type TEXT NOT NULL CHECK(type IN ('private', 'group', 'channel')),
-  title TEXT,
-  avatar_url TEXT,
-  description TEXT,
-  member_count INTEGER NOT NULL DEFAULT 1,
-  last_message_id TEXT,
-  last_message_at INTEGER,
-  pinned INTEGER NOT NULL DEFAULT 0,
-  muted INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-
--- Messages table
-CREATE TABLE IF NOT EXISTS messages (
-  id TEXT PRIMARY KEY,
-  chat_id TEXT NOT NULL,
-  sender_id TEXT NOT NULL,
-  content TEXT NOT NULL,
-  type TEXT NOT NULL CHECK(type IN ('text', 'image', 'video', 'file', 'audio', 'voice')),
-  reply_to_id TEXT,
-  forwarded_from_id TEXT,
-  edited INTEGER NOT NULL DEFAULT 0,
-  read INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
-  FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-  FOREIGN KEY (sender_id) REFERENCES users(id),
-  FOREIGN KEY (reply_to_id) REFERENCES messages(id) ON DELETE SET NULL
-);
-
--- Chat members table
-CREATE TABLE IF NOT EXISTS chat_members (
-  id TEXT PRIMARY KEY,
-  chat_id TEXT NOT NULL,
-  user_id TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'member' CHECK(role IN ('owner', 'admin', 'member')),
-  joined_at INTEGER NOT NULL,
-  left_at INTEGER,
-  FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE(chat_id, user_id)
-);
-
--- Contacts table
-CREATE TABLE IF NOT EXISTS contacts (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  contact_user_id TEXT NOT NULL,
-  nickname TEXT,
-  blocked INTEGER NOT NULL DEFAULT 0,
-  favorite INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (contact_user_id) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE(user_id, contact_user_id)
-);
-
--- Media table
-CREATE TABLE IF NOT EXISTS media (
-  id TEXT PRIMARY KEY,
-  message_id TEXT NOT NULL,
-  type TEXT NOT NULL CHECK(type IN ('image', 'video', 'file', 'audio')),
-  url TEXT NOT NULL,
-  thumbnail_url TEXT,
-  file_name TEXT NOT NULL,
-  file_size INTEGER NOT NULL,
-  mime_type TEXT NOT NULL,
-  width INTEGER,
-  height INTEGER,
-  duration INTEGER,
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
-);
-
--- App state table (singleton state)
-CREATE TABLE IF NOT EXISTS app_state (
-  key TEXT PRIMARY KEY,
-  value TEXT
-);
-
--- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
-CREATE INDEX IF NOT EXISTS idx_chat_members_chat_id ON chat_members(chat_id);
-CREATE INDEX IF NOT EXISTS idx_chat_members_user_id ON chat_members(user_id);
-CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts(user_id);
-CREATE INDEX IF NOT EXISTS idx_media_message_id ON media(message_id);
-`
+import { migrations } from './migration-manifest'
 
 /**
  * SQLite 数据库服务
@@ -126,13 +15,14 @@ export class DatabaseService {
     const path = dbPath || join(app.getPath('userData'), 'typez.db')
     this.db = new Database(path)
     this.db.pragma('journal_mode = WAL')
+    this.db.pragma('foreign_keys = ON')
     console.log('[Database] 已连接，路径:', path)
     this.initialize()
   }
 
   private initialize(): void {
-    // 运行迁移脚本
-    this.db.exec(INIT_SQL)
+    // 迁移：按清单顺序执行（幂等）
+    this.applyMigrations()
 
     // 开发阶段：重置 users 表（MVP 重构）
     // 仅在开发环境且显式启用 RESET_USERS 时重置，默认不重置
@@ -141,7 +31,42 @@ export class DatabaseService {
     if (isDevelopment && shouldResetUsers) {
       console.log('[Database] RESET_USERS=true，重置 users 表')
       this.resetUsersTable()
+      // 重置后触发器/FTS 可能被删除：重新执行一次幂等迁移以补齐对象
+      const m003 = migrations.find((m) => m.id === '003_im_core_extensions')
+      if (m003) m003.run(this.db)
     }
+  }
+
+  private applyMigrations(): void {
+    // 迁移记录表：避免重复执行
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        id TEXT PRIMARY KEY,
+        applied_at INTEGER NOT NULL
+      );
+    `)
+
+    const appliedRows = this.db.prepare('SELECT id FROM schema_migrations').all() as Array<{
+      id: string
+    }>
+    const applied = new Set(appliedRows.map((r) => r.id))
+
+    const now = Date.now()
+    const runAll = this.db.transaction(() => {
+      for (const m of migrations) {
+        const shouldRun = m.shouldRun ? m.shouldRun() : true
+        if (!shouldRun) continue
+        if (applied.has(m.id)) continue
+
+        console.log('[Database] apply migration:', m.id)
+        m.run(this.db)
+        this.db
+          .prepare('INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)')
+          .run(m.id, now)
+      }
+    })
+
+    runAll()
   }
 
   /**
@@ -149,12 +74,10 @@ export class DatabaseService {
    */
   private resetUsersTable(): void {
     try {
-      // 读取重置迁移脚本
-      const resetSQL = `
-        -- 删除旧表（如果存在）
+      // 注意：该操作可能导致外键引用不一致，因此仅用于开发阶段
+      this.db.pragma('foreign_keys = OFF')
+      this.db.exec(`
         DROP TABLE IF EXISTS users;
-
-        -- 重新创建 users 表
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
           username TEXT NOT NULL UNIQUE,
@@ -164,12 +87,14 @@ export class DatabaseService {
           phone TEXT,
           bio TEXT,
           status TEXT NOT NULL DEFAULT 'offline' CHECK(status IN ('online', 'offline', 'away', 'busy')),
+          kind TEXT NOT NULL DEFAULT 'human' CHECK(kind IN ('human', 'bot', 'system')),
+          deleted_at INTEGER,
           last_seen INTEGER NOT NULL,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL
         );
-      `
-      this.db.exec(resetSQL)
+      `)
+      this.db.pragma('foreign_keys = ON')
       console.log('[Database] Users 表已重置（开发模式）')
     } catch (error) {
       console.error('[Database] 重置 users 表失败:', error)
@@ -270,6 +195,46 @@ export class DatabaseService {
     const result = stmt.run(...values)
 
     return { rowsAffected: result.changes }
+  }
+
+  /**
+   * 执行任意 SQL（无返回）
+   */
+  exec(sql: string): void {
+    this.db.exec(sql)
+  }
+
+  /**
+   * 执行任意 SQL 并返回多行
+   */
+  rawAll<T = unknown>(sql: string, params?: unknown[]): T[] {
+    const stmt = this.db.prepare(sql)
+    return (params ? stmt.all(...params) : stmt.all()) as T[]
+  }
+
+  /**
+   * 执行任意 SQL 并返回单行
+   */
+  rawGet<T = unknown>(sql: string, params?: unknown[]): T | undefined {
+    const stmt = this.db.prepare(sql)
+    return (params ? stmt.get(...params) : stmt.get()) as T | undefined
+  }
+
+  /**
+   * 执行任意 SQL 并返回 changes 等信息
+   */
+  rawRun(sql: string, params?: unknown[]): { rowsAffected: number } {
+    const stmt = this.db.prepare(sql)
+    const result = params ? stmt.run(...params) : stmt.run()
+    return { rowsAffected: result.changes }
+  }
+
+  /**
+   * 在同一连接上执行事务（用于多表原子操作）
+   */
+  transaction<T>(fn: () => T): T {
+    const tx = this.db.transaction(fn)
+    return tx()
   }
 
   close(): void {

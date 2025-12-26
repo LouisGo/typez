@@ -24,4 +24,23 @@ export function setupChatHandlers(): void {
   createHandler('chat:sendMessage', async (params) => {
     return await chatService.sendMessage(params.chatId, params.content)
   })
+
+  // 获取会话设置
+  createHandler('chat:getSettings', async (params) => {
+    return await chatService.getSettings(params.chatId)
+  })
+
+  // 更新会话设置
+  createHandler('chat:updateSettings', async (params) => {
+    return await chatService.updateSettings(params.chatId, {
+      pinned: params.pinned,
+      muted: params.muted,
+      archived: params.archived
+    })
+  })
+
+  // 标记已读
+  createHandler('chat:markRead', async (params) => {
+    await chatService.markRead(params.chatId, params.lastReadMessageId)
+  })
 }
