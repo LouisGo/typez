@@ -39,8 +39,8 @@ export function chatTableToChat(table: ChatTable): Chat {
     memberCount: table.member_count,
     lastMessageId: table.last_message_id as MessageId | null,
     lastMessageAt: table.last_message_at,
-    pinned: table.pinned,
-    muted: table.muted,
+    pinned: Boolean(table.pinned), // Convert SQLite INTEGER to boolean
+    muted: Boolean(table.muted), // Convert SQLite INTEGER to boolean
     createdBy: (table.created_by as UserId | null) ?? null,
     metadata: table.metadata ?? null,
     deletedAt: table.deleted_at ?? null,
@@ -61,8 +61,8 @@ export function messageTableToMessage(table: MessageTable): Message {
     type: table.type,
     replyToId: table.reply_to_id as MessageId | null,
     forwardedFromId: table.forwarded_from_id as MessageId | null,
-    edited: table.edited,
-    read: table.read,
+    edited: Boolean(table.edited), // Convert SQLite INTEGER to boolean
+    read: Boolean(table.read), // Convert SQLite INTEGER to boolean
     clientId: table.client_id ?? null,
     status: table.status,
     editedAt: table.edited_at ?? null,

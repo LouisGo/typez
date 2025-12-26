@@ -162,12 +162,14 @@ export class ChatService implements IChatService {
           sender_id: meId,
           content,
           type: 'text',
+          reply_to_id: null,
+          forwarded_from_id: null,
           client_id: clientId,
           status: 'sent',
           created_at: now,
           updated_at: now,
-          read: false,
-          edited: false,
+          read: 0,
+          edited: 0,
           edited_at: null,
           deleted_at: null
         }

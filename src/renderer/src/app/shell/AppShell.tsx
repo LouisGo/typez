@@ -18,7 +18,8 @@ const navItems: NavItem[] = [
 ]
 
 export function AppShell() {
-  const { user } = useAuthStore()
+  const user = useAuthStore((store) => store.user)
+  const logout = useAuthStore((store) => store.logout)
   return (
     <div className="h-screen w-screen bg-background text-foreground">
       <div className="mx-auto flex h-full max-w-6xl flex-col">
@@ -44,7 +45,7 @@ export function AppShell() {
             </nav>
             <ModeToggle />
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/auth/login">登录</Link>
+              <button onClick={() => logout()}>退出登录</button>
             </Button>
           </div>
         </header>

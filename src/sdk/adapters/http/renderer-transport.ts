@@ -7,6 +7,7 @@ import type {
 } from '@sdk/contract'
 import type { Transport } from '@sdk/core/transport'
 import type { ProtocolResult } from '@sdk/core/protocol'
+import { CommonErrorCode, isProtocolResult } from '@sdk/core/protocol'
 
 type RequestSpec =
   | {
@@ -110,8 +111,44 @@ export function createHttpRendererTransport(input: { baseUrl: string }): Transpo
         body: spec.method === 'GET' ? undefined : JSON.stringify(spec.body ? spec.body(p) : p)
       })
 
-      const json = (await res.json()) as ProtocolResult<unknown>
-      return json as ContractResult<C>
+      // 强制把响应归一成 ProtocolResult：
+      // - 若服务端已按 envelope 返回：直接透传
+      // - 若服务端返回裸数据：在 transport 层补 envelope，避免 SDK 侧协议解析失败
+      let json: unknown
+      try {
+        json = await res.json()
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : typeof e === 'string' ? e : '响应解析失败（非 JSON）'
+        const payload: ProtocolResult<unknown> = {
+          ok: false,
+          error: {
+            code: CommonErrorCode.TRANSPORT_ERROR,
+            message: `HTTP 响应解析失败: ${message}`,
+            details: { status: res.status, url }
+          }
+        }
+        return payload as ContractResult<C>
+      }
+
+      if (isProtocolResult(json)) {
+        return json as ContractResult<C>
+      }
+
+      if (res.ok) {
+        const payload: ProtocolResult<unknown> = { ok: true, data: json }
+        return payload as ContractResult<C>
+      }
+
+      const payload: ProtocolResult<unknown> = {
+        ok: false,
+        error: {
+          code: CommonErrorCode.INTERNAL_ERROR,
+          message: 'HTTP 请求失败',
+          details: { status: res.status, url, body: json }
+        }
+      }
+      return payload as ContractResult<C>
     },
 
     on<E extends EventChannel>(_event: E, _listener: (payload: EventContract[E]) => void): void {

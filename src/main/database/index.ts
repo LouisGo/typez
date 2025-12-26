@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3'
 import { app } from 'electron'
+import { existsSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import type { QueryParams, QueryResult, InsertParams, InsertResult } from '@sdk/contract'
 import { migrations } from './migration-manifest'
@@ -12,7 +13,14 @@ export class DatabaseService {
   private db: Database.Database
 
   constructor(dbPath?: string) {
-    const path = dbPath || join(app.getPath('userData'), 'typez.db')
+    // 全新开始：使用新库文件，同时清理旧库文件（旧数据彻底丢弃）
+    const userDataDir = app.getPath('userData')
+    const path = dbPath || join(userDataDir, 'typez.v2.db')
+
+    // 删除旧库（typez.db + wal/shm），避免残留数据影响使用
+    // 注意：只清理旧文件名，不删除当前 v2 库
+    this.tryDeleteLegacyDbFiles(userDataDir)
+
     this.db = new Database(path)
     this.db.pragma('journal_mode = WAL')
     this.db.pragma('foreign_keys = ON')
@@ -23,18 +31,6 @@ export class DatabaseService {
   private initialize(): void {
     // 迁移：按清单顺序执行（幂等）
     this.applyMigrations()
-
-    // 开发阶段：重置 users 表（MVP 重构）
-    // 仅在开发环境且显式启用 RESET_USERS 时重置，默认不重置
-    const isDevelopment = process.env.NODE_ENV === 'development'
-    const shouldResetUsers = process.env.RESET_USERS === 'true'
-    if (isDevelopment && shouldResetUsers) {
-      console.log('[Database] RESET_USERS=true，重置 users 表')
-      this.resetUsersTable()
-      // 重置后触发器/FTS 可能被删除：重新执行一次幂等迁移以补齐对象
-      const m003 = migrations.find((m) => m.id === '003_im_core_extensions')
-      if (m003) m003.run(this.db)
-    }
   }
 
   private applyMigrations(): void {
@@ -69,35 +65,15 @@ export class DatabaseService {
     runAll()
   }
 
-  /**
-   * 重置 users 表（仅开发阶段使用）
-   */
-  private resetUsersTable(): void {
-    try {
-      // 注意：该操作可能导致外键引用不一致，因此仅用于开发阶段
-      this.db.pragma('foreign_keys = OFF')
-      this.db.exec(`
-        DROP TABLE IF EXISTS users;
-        CREATE TABLE IF NOT EXISTS users (
-          id TEXT PRIMARY KEY,
-          username TEXT NOT NULL UNIQUE,
-          display_name TEXT NOT NULL,
-          password TEXT NOT NULL,
-          avatar_url TEXT,
-          phone TEXT,
-          bio TEXT,
-          status TEXT NOT NULL DEFAULT 'offline' CHECK(status IN ('online', 'offline', 'away', 'busy')),
-          kind TEXT NOT NULL DEFAULT 'human' CHECK(kind IN ('human', 'bot', 'system')),
-          deleted_at INTEGER,
-          last_seen INTEGER NOT NULL,
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
-        );
-      `)
-      this.db.pragma('foreign_keys = ON')
-      console.log('[Database] Users 表已重置（开发模式）')
-    } catch (error) {
-      console.error('[Database] 重置 users 表失败:', error)
+  private tryDeleteLegacyDbFiles(userDataDir: string): void {
+    const legacyBase = join(userDataDir, 'typez.db')
+    const candidates = [legacyBase, `${legacyBase}-wal`, `${legacyBase}-shm`]
+    for (const file of candidates) {
+      try {
+        if (existsSync(file)) unlinkSync(file)
+      } catch (e) {
+        console.warn('[Database] Failed to delete legacy db file:', file, e)
+      }
     }
   }
 
@@ -175,10 +151,16 @@ export class DatabaseService {
     const values = [...Object.values(params.data), ...Object.values(params.where)]
     const sql = `UPDATE ${params.table} SET ${setClause} WHERE ${whereClause}`
 
-    const stmt = this.db.prepare(sql)
-    const result = stmt.run(...values)
-
-    return { rowsAffected: result.changes }
+    try {
+      const stmt = this.db.prepare(sql)
+      const result = stmt.run(...values)
+      return { rowsAffected: result.changes }
+    } catch (error) {
+      console.error('[Database] UPDATE failed:', error)
+      console.error('[Database] SQL:', sql)
+      console.error('[Database] Values:', values)
+      throw error
+    }
   }
 
   /**

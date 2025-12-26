@@ -66,10 +66,15 @@ export class AuthService implements IAuthService {
     validateUsername(username)
     validatePassword(password)
 
+    console.log('username', username)
+    console.log('password', password)
+
     const result = this.db.query({
       table: 'users',
       where: { username }
     })
+
+    console.log('result', result)
 
     if (result.rows.length === 0) {
       throw createAuthError.userNotFound()
@@ -81,9 +86,10 @@ export class AuthService implements IAuthService {
       throw createAuthError.invalidPassword()
     }
 
+    // 更新用户状态为在线
     this.db.update({
       table: 'users',
-      data: { status: 'online', last_seen: Date.now() },
+      data: { status: 'online', last_seen: Date.now(), updated_at: Date.now() },
       where: { id: userTable.id }
     })
 
@@ -128,9 +134,9 @@ export class AuthService implements IAuthService {
         username: username.trim(),
         display_name: displayName.trim(),
         password,
-        avatar_url: '',
-        phone: '',
-        bio: '',
+        avatar_url: null,
+        phone: null,
+        bio: null,
         status: 'online',
         kind: 'human',
         deleted_at: null,
@@ -159,7 +165,7 @@ export class AuthService implements IAuthService {
   async logout(userId: UserId): Promise<void> {
     this.db.update({
       table: 'users',
-      data: { status: 'offline', last_seen: Date.now() },
+      data: { status: 'offline', last_seen: Date.now(), updated_at: Date.now() },
       where: { id: userId }
     })
     if (this.currentUserId === userId) {

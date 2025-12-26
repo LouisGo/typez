@@ -43,8 +43,8 @@ export interface ChatTable {
   member_count: number
   last_message_id: string | null
   last_message_at: number | null
-  pinned: boolean
-  muted: boolean
+  pinned: number // SQLite stores boolean as INTEGER (0/1)
+  muted: number // SQLite stores boolean as INTEGER (0/1)
   created_by?: string | null
   metadata?: string | null
   deleted_at?: number | null
@@ -60,8 +60,8 @@ export interface MessageTable {
   type: MessageType
   reply_to_id: string | null
   forwarded_from_id: string | null
-  edited: boolean
-  read: boolean
+  edited: number // SQLite stores boolean as INTEGER (0/1)
+  read: number // SQLite stores boolean as INTEGER (0/1)
   client_id?: string | null
   status?: MessageLocalStatus
   edited_at?: number | null
@@ -84,8 +84,8 @@ export interface ContactTable {
   user_id: string
   contact_user_id: string
   nickname: string | null
-  blocked: boolean
-  favorite: boolean
+  blocked: number // SQLite stores boolean as INTEGER (0/1)
+  favorite: number // SQLite stores boolean as INTEGER (0/1)
   created_at: number
 }
 
@@ -118,9 +118,9 @@ export interface ChatUserSettingsTable {
   id: string
   user_id: string
   chat_id: string
-  pinned: boolean
-  muted: boolean
-  archived: boolean
+  pinned: number // SQLite stores boolean as INTEGER (0/1)
+  muted: number // SQLite stores boolean as INTEGER (0/1)
+  archived: number // SQLite stores boolean as INTEGER (0/1)
   last_read_message_id: string | null
   last_read_at: number | null
   unread_count: number

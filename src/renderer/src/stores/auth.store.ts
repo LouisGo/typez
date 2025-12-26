@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authAPI } from '@infra/api'
 import type { User } from '@sdk/contract/models'
+import { toast } from 'sonner'
+import { router } from '@/app/router'
 
 /**
  * 认证状态管理
@@ -73,11 +75,19 @@ export const useAuthStore = create<AuthState>()(
         if (user) {
           try {
             await authAPI.logout(user.id)
+            set({ user: null, isAuthenticated: false, isLoading: false })
+            toast.success('退出登录成功')
+            // 跳转到登录页面
+            router.navigate({ to: '/auth/login' })
           } catch (error) {
             console.error('Logout failed:', error)
+            set({
+              error: error instanceof Error ? error.message : '退出登录失败',
+              isLoading: false
+            })
+            throw error
           }
         }
-        set({ user: null, isAuthenticated: false })
       },
 
       setAuth: (user: User) => set({ user, isAuthenticated: true }),

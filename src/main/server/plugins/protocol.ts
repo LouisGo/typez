@@ -16,13 +16,11 @@ export const protocolPlugin: FastifyPluginAsync = fp(async (server) => {
     reply.status(200).send(payload)
   })
 
-  server.addHook('onSend', async (_req, _reply, payload) => {
-    // payload 可能是 string/buffer/object；我们只对 object 做包装
-    if (payload && typeof payload === 'object') {
-      if (isProtocolResult(payload)) return payload
-      const wrapped: ProtocolResult<unknown> = { ok: true, data: payload }
-      return wrapped
-    }
-    return payload
+  // 用 preSerialization（而不是 onSend），确保拿到的是“未序列化”的 payload；
+  // 否则 onSend 阶段 payload 往往已经是 string，导致 envelope 没被包装，SDK 侧解析失败。
+  server.addHook('preSerialization', async (_req, _reply, payload) => {
+    if (isProtocolResult(payload)) return payload
+    const wrapped: ProtocolResult<unknown> = { ok: true, data: payload ?? null }
+    return wrapped
   })
 })
